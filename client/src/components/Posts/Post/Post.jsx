@@ -28,7 +28,7 @@ const Post = ({ post, setCurrentId }) => {
   const userId = user?.result?.googleId || user?.result?._id;
 
   const Likes = () => {
-    if (post.likes.length > 0) {
+    if (post?.likes.length > 0) {
       return post.likes.includes(userId)
         ? (<><ThumbUpAltIcon fontSize="small" /> {post.likes.length} {post.likes.length > 1 ? 'Likes' : 'Like'}</>)
         : (<><ThumbUpAltOutlined fontSize="small" /> {post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</>);
