@@ -9,7 +9,7 @@ const Posts = ({ setCurrentId }) => {
   const classes = useStyles();
 
   // Check if posts is undefined or empty, and handle the loading state
-  if (!posts.length && !isLoading) return 'No posts';
+  if (!posts?.length && !isLoading) return 'No posts';
 
   return (
     isLoading ? <CircularProgress /> : (
