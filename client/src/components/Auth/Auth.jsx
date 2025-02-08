@@ -73,7 +73,7 @@ const Auth = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_API}>
+            <GoogleOAuthProvider clientId="748632032018-jajhqq9kvlmegvn34dj0kvad2go0lq5f.apps.googleusercontent.com">
                 <Container component='main' maxWidth='xs'>
                     <Paper className={classes.paper} elevation={3}>
                         <Avatar className={classes.avatar}>
