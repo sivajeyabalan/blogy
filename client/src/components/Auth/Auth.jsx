@@ -13,7 +13,7 @@ import { useStyles } from './Styles';
 import Input from './Input';
 
 const theme = createTheme();
-const clientId = import.meta.env.VITE_GOOGLE_API;
+const clientId = `${import.meta.env.VITE_GOOGLE_API}`;
 const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
 
 const Auth = () => {
