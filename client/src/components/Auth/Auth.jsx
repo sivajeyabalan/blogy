@@ -13,7 +13,6 @@ import { useStyles } from './Styles';
 import Input from './Input';
 
 const theme = createTheme();
-const clientId = `${import.meta.env.VITE_GOOGLE_API}`;
 const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
 
 const Auth = () => {
@@ -74,7 +73,7 @@ const Auth = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <GoogleOAuthProvider clientId={clientId}>
+            <GoogleOAuthProvider clientId={`${import.meta.env.VITE_GOOGLE_API}`}>
                 <Container component='main' maxWidth='xs'>
                     <Paper className={classes.paper} elevation={3}>
                         <Avatar className={classes.avatar}>
