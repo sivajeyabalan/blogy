@@ -5,20 +5,26 @@ import cors from "cors";
 import dotenv from "dotenv";
 import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
-const app = express(); // Initialize the app before using it
 
 dotenv.config();
+
+const app = express(); // Move this line to the top
 
 // Configure CORS
 app.use(
   cors({
-    origin: "https://memories-project-client.vercel.app", // Allow only your client URL
+    origin:
+      process.env.APPLICATION_URL ||
+      "https://memories-project-client.vercel.app", // Use environment variable if available
     methods: ["GET", "POST", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow Authorization header for token
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-console.log("CORS allowed origin:", process.env.APPLICATION_URL);
+console.log(
+  "CORS allowed origin:",
+  process.env.APPLICATION_URL || "https://memories-project-client.vercel.app"
+);
 
 // Middleware for handling incoming JSON data
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
@@ -27,6 +33,11 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 // Routes
 app.use("/posts", postRoutes);
 app.use("/user", userRoutes);
+
+// Add a root route
+app.get("/", (req, res) => {
+  res.send("Memories Project API is running");
+});
 
 const PORT = process.env.PORT || 5000;
 
