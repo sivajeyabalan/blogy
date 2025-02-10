@@ -10,33 +10,28 @@ dotenv.config();
 
 const app = express(); // Initialize the app before using it
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      "https://memories-project-client.vercel.app", // Update to match the client URL
-    ];
-
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true,
-};
-
-app.use(cors(corsOptions)); // Now it works because app is initialized before use
+// Configure CORS
+app.use(
+  cors({
+    origin: "https://memories-project-client.vercel.app", // Allow only your client URL
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow Authorization header for token
+  })
+);
 
 console.log("CORS allowed origin:", process.env.APPLICATION_URL);
 
+// Middleware for handling incoming JSON data
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
+
+// Routes
 app.use("/posts", postRoutes);
 app.use("/user", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+// Connect to MongoDB and start the server
 mongoose
   .connect(process.env.CONNECTION_URL)
   .then(() =>
