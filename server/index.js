@@ -7,8 +7,9 @@ import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
 
 const corsOptions = {
-  origin: process.env.APPLICATION_URL,
+  origin: process.env.APPLICATION_URL || "*", // Allow frontend URL or fallback to all
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
 };
 
 const app = express();
