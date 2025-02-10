@@ -5,10 +5,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
+const app = express(); // Initialize the app before using it
 
 dotenv.config();
-
-const app = express(); // Initialize the app before using it
 
 // Configure CORS
 app.use(
