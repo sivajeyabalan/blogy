@@ -6,6 +6,10 @@ import dotenv from "dotenv";
 import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
 
+dotenv.config();
+
+const app = express(); // Initialize the app before using it
+
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
@@ -22,17 +26,15 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // Now it works because app is initialized before use
 
 console.log("CORS allowed origin:", process.env.APPLICATION_URL);
-
-const app = express();
-dotenv.config();
 
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use("/posts", postRoutes);
 app.use("/user", userRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 mongoose
