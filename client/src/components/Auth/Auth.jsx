@@ -116,6 +116,8 @@ const Auth = () => {
                                         padding: '10px',
                                         borderRadius: '5px'
                                     }}
+                                    useOneTap
+                                    redirectUri="https://memories-project-client-mar8y1yk4-nitheeshlingam-rs-projects.vercel.app"
                                 />
                             </Box>
 
