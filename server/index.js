@@ -30,7 +30,7 @@ console.log(
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 
-// Routes
+// Dynamically import routes
 const postRoutes = (await import("./routes/posts.js")).default;
 const userRoutes = (await import("./routes/users.js")).default;
 
@@ -45,12 +45,23 @@ app.get("/", (req, res) => {
 // Handle favicon requests
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
-const PORT = process.env.PORT || 5000;
+// Main function to initialize server
+const startServer = async () => {
+  try {
+    // Connect to MongoDB
+    await mongoose.connect(process.env.CONNECTION_URL);
 
-// Connect to MongoDB and start the server
-try {
-  await mongoose.connect(process.env.CONNECTION_URL);
-  app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
-} catch (error) {
-  console.log("Error connecting to MongoDB or starting server:", error.message);
-}
+    // Start the server
+    app.listen(process.env.PORT || 5000, () =>
+      console.log(`Server running on port: ${process.env.PORT || 5000}`)
+    );
+  } catch (error) {
+    console.log(
+      "Error connecting to MongoDB or starting server:",
+      error.message
+    );
+  }
+};
+
+// Call the startServer function
+startServer();
