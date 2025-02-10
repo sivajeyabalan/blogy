@@ -11,6 +11,7 @@ const corsOptions = {
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
+console.log("CORS allowed origin:", process.env.APPLICATION_URL);
 
 const app = express();
 dotenv.config();
