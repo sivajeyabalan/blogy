@@ -26,7 +26,7 @@ export const getPosts = async (req, res) => {
       .sort({ _id: -1 })
       .limit(LIMIT)
       .skip(startIndex);
-
+    console.log("Posts from MongoDB:", posts); // Debugging
     res.json({
       data: posts,
       currentPage: Number(page),

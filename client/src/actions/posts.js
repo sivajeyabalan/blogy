@@ -29,7 +29,7 @@ export const getPosts = (page) => async (dispatch) => {
     const {
       data: { data, currentPage, numberOfPages },
     } = await api.fetchPosts(page);
-
+    console.log("Fetched Posts:", data); // Debugging
     dispatch({
       type: FETCH_ALL,
       payload: { data, currentPage, numberOfPages },
