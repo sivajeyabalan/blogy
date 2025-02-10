@@ -7,10 +7,23 @@ import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
 
 const corsOptions = {
-  origin: process.env.APPLICATION_URL || "*", // Allow frontend URL or fallback to all
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      "https://memories-project-client.vercel.app", // Update to match the client URL
+    ];
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
+
+app.use(cors(corsOptions));
+
 console.log("CORS allowed origin:", process.env.APPLICATION_URL);
 
 const app = express();
@@ -18,7 +31,6 @@ dotenv.config();
 
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors(corsOptions));
 app.use("/posts", postRoutes);
 app.use("/user", userRoutes);
 const PORT = process.env.PORT || 5000;
