@@ -1,12 +1,10 @@
-
-import React, { useState, useEffect } from "react";
-import { TextField, Button, Typography, Paper } from "@mui/material";
-import FileBase from "react-file-base64";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { createPost, updatePost } from "../../actions/posts";
-import useStyles from "./styles";
+import React, { useState, useEffect } from 'react';
+import { TextField, Button, Typography, Paper } from '@mui/material';
+import FileBase from 'react-file-base64';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { createPost, updatePost } from '../../actions/posts';
+import useStyles from './styles';
 const Form = ({ currentId, setCurrentId }) => {
   const [postData, setPostData] = useState({
     title: "",

@@ -1,21 +1,15 @@
-import React from "react";
-import {
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
-  Button,
-  Typography,
-  ButtonBase
-} from "@mui/material";
-import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
-import ThumbUpAltOutlined from "@mui/icons-material/ThumbUpAltOutlined";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import useStyles from "./styles";
-import moment from "moment";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { Card, CardActions, CardContent, CardMedia, Button, Typography, ButtonBase } from '@mui/material';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import moment from 'moment';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { deletePost, likePost } from '../../../actions/posts';
+import useStyles from './styles';
+
 
 import { deletePost, likePost } from "../../../actions/posts";
 

@@ -1,10 +1,11 @@
-import { Container } from "@mui/material";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Home from "./components/Home/Home.jsx";
-import Navbar from "./components/Navbar/Navbar.jsx";
-import Auth from "./components/Auth/Auth.jsx";
-import PostDetails from "./components/PostDetails/PostDetails.jsx";
+import React from 'react';
+import { Container } from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Home from './components/Home/Home';
+import Navbar from './components/Navbar/Navbar';
+import Auth from './components/Auth/Auth';
+import PostDetails from './components/PostDetails/PostDetails';
 
 const theme = createTheme({
   palette: {
