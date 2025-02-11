@@ -8,7 +8,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
 import { signin, signup } from '../../actions/auth';
-import { googleSignIn } from '../../actions/auth';
 import { useStyles } from './Styles';
 import Input from './Input';
 
