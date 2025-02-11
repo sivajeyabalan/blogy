@@ -1,7 +1,9 @@
 import axios from "axios";
 
 // Initialize Axios with the base URL from environment variables
-const API = axios.create({ baseURL: "http://localhost:5000/" });
+const API = axios.create({
+  baseURL: "https://memories-project-server.vercel.app/",
+});
 
 //baseURL: import.meta.env.VITE_SERVER_APP_URL, // This should be the server URL where your backend is hosted
 // Request interceptor to add Authorization header if a profile (with token) exists in localStorage
