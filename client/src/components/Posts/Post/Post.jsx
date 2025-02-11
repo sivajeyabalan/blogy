@@ -10,9 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import { deletePost, likePost } from '../../../actions/posts';
 import useStyles from './styles';
 
-
-import { deletePost, likePost } from "../../../actions/posts";
-
 const Post = ({ post, setCurrentId }) => {
   const classes = useStyles();
   const dispatch = useDispatch();

@@ -1,27 +1,16 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import rootReducer from './reducers';
-import App from './App';
-import './index.css';
-
-const store = configureStore({
-  reducer: rootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
-});
-
-const theme = createTheme({
-  palette: {
-    primary: { main: '#1714CAFF' },
-    secondary: { main: '#dc004e' },
-  },
-});
-
-const container = document.getElementById('root');
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware, compose } from "redux";
+import { thunk } from "redux-thunk";
+import { ThemeProvider, createTheme } from "@mui/material/styles"; // Import ThemeProvider
+import reducers from "./reducers";
+import App from "./App";
+import "./index.css";
+const theme = createTheme();
+const container = document.getElementById("root");
 const root = createRoot(container);
-
+const store = createStore(reducers, compose(applyMiddleware(thunk)));
 root.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>

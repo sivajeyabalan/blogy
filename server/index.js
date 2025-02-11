@@ -3,65 +3,22 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import postRoutes from "./routes/posts.js";
+import userRoutes from "./routes/users.js";
 
-// Load environment variables
+const app = express();
 dotenv.config();
 
-// Create Express app
-const app = express();
-
-// Configure CORS
-app.use(
-  cors({
-    origin:
-      process.env.APPLICATION_URL ||
-      "https://memories-project-client.vercel.app",
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-console.log(
-  "CORS allowed origin:",
-  process.env.APPLICATION_URL || "https://memories-project-client.vercel.app"
-);
-
-// Middleware for handling incoming JSON data
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-
-// Dynamically import routes
-const postRoutes = (await import("./routes/posts.js")).default;
-const userRoutes = (await import("./routes/users.js")).default;
-
+app.use(cors({ origin: "*", credentials: true }));
 app.use("/posts", postRoutes);
 app.use("/user", userRoutes);
+const PORT = process.env.PORT || 5000;
 
-// Add a root route
-app.get("/", (req, res) => {
-  res.send("Memories Project API is running");
-});
-
-// Handle favicon requests
-app.get("/favicon.ico", (req, res) => res.status(204).end());
-
-// Main function to initialize server
-const startServer = async () => {
-  try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.CONNECTION_URL);
-
-    // Start the server
-    app.listen(process.env.PORT || 5000, () =>
-      console.log(`Server running on port: ${process.env.PORT || 5000}`)
-    );
-  } catch (error) {
-    console.log(
-      "Error connecting to MongoDB or starting server:",
-      error.message
-    );
-  }
-};
-
-// Call the startServer function
-startServer();
+mongoose
+  .connect(process.env.CONNECTION_URL)
+  .then(() =>
+    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`))
+  )
+  .catch((error) => console.log(error.message));

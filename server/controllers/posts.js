@@ -22,6 +22,8 @@ export const getPosts = async (req, res) => {
     const LIMIT = 9;
     const startIndex = (Number(page) - 1) * LIMIT;
     const total = await PostMessage.countDocuments({});
+    const posts_s = await PostMessage.find(); // This should return all posts if there are any
+    console.log(posts_s);
     const posts = await PostMessage.find()
       .sort({ _id: -1 })
       .limit(LIMIT)
