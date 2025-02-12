@@ -45,7 +45,10 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
     dispatch({ type: START_LOADING });
     const {
       data: { data },
-    } = await api.fetchPostsBySearch(searchQuery);
+    } = await api.fetchPostsBySearch({
+      search: searchQuery.search,
+      tags: searchQuery.tags.toLowerCase(), // Convert the tags to lowercase before sending to the backend
+    });
     dispatch({ type: FETCH_BY_SEARCH, payload: { data } });
     dispatch({ type: END_LOADING });
   } catch (error) {

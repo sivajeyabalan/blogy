@@ -29,12 +29,15 @@ const Home = () => {
 
     const searchPost = () => {
         if (search.trim() || (tags && tags.length > 0)) {
-            dispatch(getPostsBySearch({ search, tags: Array.isArray(tags) ? tags.join(',') : '' }));
-            navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${tags.join(',')}`);
+            // Convert tags to lowercase and remove any extra spaces
+            const formattedTags = tags.map((tag) => tag.trim().toLowerCase()).join(",");
+            dispatch(getPostsBySearch({ search, tags: formattedTags }));
+            navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${formattedTags}`);
         } else {
             navigate('/');
         }
     };
+
 
     const handleKeyPress = (e) => {
         if (e.keyCode === "13") {

@@ -19,6 +19,9 @@ export default makeStyles((theme) => ({
     margin: "10px 0",
   },
   buttonSubmit: {
-    marginBottom: 10,
+    marginBottom: theme.spacing(2), // Adds space below the submit button
+  },
+  buttonClear: {
+    marginTop: theme.spacing(2), // Adds space above the clear button
   },
 }));

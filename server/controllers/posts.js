@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import cloudinary from "../config/cloudinary.js";
 import PostMessage from "../models/postMessage.js";
 
 const router = express.Router();
@@ -56,22 +57,43 @@ export const getPostsBySearch = async (req, res) => {
 };
 
 export const createPost = async (req, res) => {
-  const post = req.body;
+  console.log("Received Post Data:", req.body); // Debugging
+  const { title, message, tags, selectedFile, name } = req.body;
 
   if (!req.userId) {
     return res.status(403).json({ message: "Unauthorized - No User ID" });
   }
 
-  const newPost = new PostMessage({
-    ...post,
-    creator: String(req.userId), // Convert to string to avoid issues
-    createdAt: new Date(),
-  });
-
   try {
+    let imageUrl = selectedFile;
+    if (selectedFile) {
+      console.log("Uploading Image to Cloudinary..."); // Debugging
+      const uploadResponse = await cloudinary.uploader.upload(selectedFile, {
+        folder: "MemoriesApp",
+        resource_type: "auto",
+      });
+      imageUrl = uploadResponse.secure_url;
+    }
+
+    console.log("Final Image URL:", imageUrl); // Debugging
+
+    const newPost = new PostMessage({
+      title,
+      message,
+      tags: Array.isArray(tags)
+        ? tags
+        : tags.split(",").map((tag) => tag.trim().toLowerCase()),
+      selectedFile: imageUrl,
+      creator: String(req.userId),
+      name,
+      createdAt: new Date(),
+    });
+
     await newPost.save();
+    console.log("Post Created:", newPost); // Debugging
     res.status(201).json(newPost);
   } catch (error) {
+    console.error("Error Creating Post:", error);
     res.status(409).json({ message: error.message });
   }
 };
