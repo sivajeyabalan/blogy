@@ -17,6 +17,7 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
 
   const userId = user?.result?.googleId || user?.result?._id;
+
   const Likes = () => {
     if (post?.likes.length > 0) {
       return post.likes.includes(userId)
@@ -36,9 +37,13 @@ const Post = ({ post, setCurrentId }) => {
 
   return (
     <Card className={classes.card} raised elevation={6}>
-      <ButtonBase className={classes.cardAction} component="span"
-        name="test" onClick={openPost}>
-        <CardMedia className={classes.media} image={post.selectedFile || 'https://user-images.githubusercontent.com/194400/49531010-48dad180-f8b1-11e8-8d89-1e61320e1d82.png'} title={post.title} />
+      <ButtonBase className={classes.cardAction} component="span" onClick={openPost}>
+        <CardMedia
+          className={classes.media}
+          image={post.selectedFile || 'https://user-images.githubusercontent.com/194400/49531010-48dad180-f8b1-11e8-8d89-1e61320e1d82.png'}
+          title={post.title}
+          loading="lazy" // Lazy loading for performance improvement
+        />
         <div className={classes.overlay}>
           <Typography variant="h6">{post.name}</Typography>
           <Typography variant="body2">{moment(post.createdAt).fromNow()}</Typography>
