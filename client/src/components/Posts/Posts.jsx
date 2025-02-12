@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid2 as Grid, CircularProgress } from "@mui/material";
+import { Grid, CircularProgress } from "@mui/material";
 import { useSelector } from "react-redux";
 import Post from "./Post/Post";
 import useStyles from "./styles";
@@ -8,8 +8,10 @@ const Posts = ({ setCurrentId }) => {
   const { posts, isLoading } = useSelector((state) => state.posts);
   const classes = useStyles();
 
+  // Check if posts is undefined or empty, and handle the loading state
   if (!posts?.length && !isLoading) return 'No posts';
   console.log(posts);
+
 
   return (
     isLoading ? <CircularProgress /> : (
@@ -20,7 +22,7 @@ const Posts = ({ setCurrentId }) => {
         spacing={2}
       >
         {posts.map((post) => (
-          <Grid key={post._id} xs={12} sm={12} md={6} lg={4}>
+          <Grid key={post._id} item xs={12} sm={12} md={6} lg={4}>
             <Post post={post} setCurrentId={setCurrentId} />
           </Grid>
         ))}
@@ -28,5 +30,6 @@ const Posts = ({ setCurrentId }) => {
     )
   );
 };
+
 
 export default Posts;
