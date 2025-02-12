@@ -1,31 +1,17 @@
 import { makeStyles } from "@mui/styles";
 
 export default makeStyles({
-  mediaContainer: {
-    position: "relative",
-    height: 0,
-    paddingTop: "56.25%", // 16:9 aspect ratio
-    backgroundColor: "#efefef",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
-  },
   media: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  },
-  placeholder: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    height: 0,
+    paddingTop: "56.25%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundBlendMode: "darken",
   },
   border: {
     border: "solid",
+  },
+  fullHeightCard: {
+    height: "100%",
   },
   card: {
     display: "flex",
@@ -37,21 +23,15 @@ export default makeStyles({
   },
   overlay: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    background: "rgba(0, 0, 0, 0.5)",
+    top: "20px",
+    left: "20px",
     color: "white",
-    padding: "20px",
-    backgroundImage:
-      "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)",
   },
   overlay2: {
     position: "absolute",
     top: "20px",
     right: "20px",
     color: "white",
-    zIndex: 2,
   },
   grid: {
     display: "flex",
@@ -70,8 +50,16 @@ export default makeStyles({
     justifyContent: "space-between",
   },
   cardAction: {
-    display: "block",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
     width: "100%",
     textAlign: "initial",
+  },
+  editIcon: {
+    transition: "transform 0.3s ease",
+    "&:hover": {
+      transform: "scale(1.3)",
+    },
   },
 });
