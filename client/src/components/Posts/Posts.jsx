@@ -10,6 +10,8 @@ const Posts = ({ setCurrentId }) => {
 
   // Check if posts is undefined or empty, and handle the loading state
   if (!posts?.length && !isLoading) return 'No posts';
+  console.log(posts);
+
 
   return (
     isLoading ? <CircularProgress /> : (

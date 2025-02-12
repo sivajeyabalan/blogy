@@ -17,7 +17,7 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
 
   const userId = user?.result?.googleId || user?.result?._id;
-
+  console.log(user.selectedFile);
   const Likes = () => {
     if (post?.likes.length > 0) {
       return post.likes.includes(userId)
