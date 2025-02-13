@@ -29,14 +29,14 @@ const Auth = () => {
         setFormData({
             firstName: "",
             lastName: "",
-            email: formData.email, // Preserve email value across switches
+            email: "", // Clear the email field too
             password: "",
             confirmPassword: "",
         });
     };
 
     useEffect(() => {
-        // Reset form if coming from redirect after error handling in actions/auth.js
+        // Reset form fields if user switches between Sign Up and Sign In
         setFormData({
             firstName: "",
             lastName: "",
