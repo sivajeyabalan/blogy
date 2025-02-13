@@ -38,10 +38,10 @@ const Form = ({ currentId, setCurrentId }) => {
       return;
     }
 
-    // Ensure tags are properly formatted as an array of lowercase, trimmed strings
-    const formattedTags = Array.isArray(postData.tags)
-      ? postData.tags.map(tag => tag.trim().toLowerCase()).filter(tag => tag !== "")
-      : postData.tags.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag !== "");
+    // Convert tags to an array only on submit
+    const formattedTags = postData.tags
+      ? postData.tags.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag !== "")
+      : [];
 
     if (currentId === 0) {
       dispatch(createPost({ ...postData, tags: formattedTags, title: trimmedTitle, name: user?.result?.name }, navigate));
@@ -50,6 +50,7 @@ const Form = ({ currentId, setCurrentId }) => {
     }
     clear();
   };
+
 
 
   const handleFileChange = async (e) => {
@@ -113,13 +114,9 @@ const Form = ({ currentId, setCurrentId }) => {
           label="Tags (comma separated)"
           fullWidth
           value={postData.tags}
-          onChange={(e) =>
-            setPostData({
-              ...postData,
-              tags: e.target.value.split(",").map((tag) => tag.trim()).filter((tag) => tag !== ""),
-            })
-          }
+          onChange={(e) => setPostData({ ...postData, tags: e.target.value })} // Store as string while typing
         />
+
         <input type="file" accept="image/*" onChange={handleFileChange} />
         {loading && <p>Uploading image...</p>} {/* Show loading text while uploading */}
         {postData.selectedFile && <img src={postData.selectedFile} alt="Uploaded" style={{ width: "100px", height: "100px", marginTop: "10px" }} />}
