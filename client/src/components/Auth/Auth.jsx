@@ -58,7 +58,7 @@ const Auth = () => {
                 token,
             };
 
-            dispatch({ type: "AUTH", data: userData });
+            dispatch(googleSignIn(token, navigate));
             localStorage.setItem("profile", JSON.stringify(userData));
             navigate("/");
         } catch (error) {
