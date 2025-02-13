@@ -52,7 +52,6 @@ const Post = ({ post, setCurrentId }) => {
         ? (<><ThumbUpAltIcon fontSize="small" /> {post.likes.length} {post.likes.length > 1 ? 'Likes' : 'Like'}</>)
         : (<><ThumbUpAltOutlined fontSize="small" /> {post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</>);
     }
-    return <><ThumbUpAltOutlined fontSize="small" /> Like</>;
   };
 
   const openPost = () => navigate(`/posts/${post._id}`);
