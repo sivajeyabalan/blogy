@@ -49,10 +49,31 @@ const Post = ({ post, setCurrentId }) => {
   const Likes = () => {
     if (post?.likes?.length > 0) {
       return post.likes.includes(userId)
-        ? (<><ThumbUpAltIcon fontSize="small" /> {post.likes.length} {post.likes.length > 1 ? 'Likes' : 'Like'}</>)
-        : (<><ThumbUpAltOutlined fontSize="small" /> {post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</>);
+        ? (
+          <>
+            <ThumbUpAltIcon fontSize="small" />
+            <Typography variant="body2" sx={{ ml: 1 }}>
+              {post.likes.length} {post.likes.length > 1 ? 'Likes' : 'Like'}
+            </Typography>
+          </>
+        )
+        : (
+          <>
+            <ThumbUpAltOutlined fontSize="small" />
+            <Typography variant="body2" sx={{ ml: 1 }}>
+              {post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}
+            </Typography>
+          </>
+        );
     }
-    return <><ThumbUpAltOutlined fontSize="small" /> Like</>;
+    return (
+      <>
+        <ThumbUpAltOutlined fontSize="small" />
+        <Typography variant="body2" sx={{ ml: 1 }}>
+          Like
+        </Typography>
+      </>
+    );
   };
 
   const openPost = () => navigate(`/posts/${post._id}`);
@@ -168,7 +189,7 @@ const Post = ({ post, setCurrentId }) => {
           color="primary"
           disabled={!user?.result}
           onClick={() => dispatch(likePost(post._id))}
-          startIcon={<ThumbUpAltOutlined />}
+          sx={{ display: 'flex', alignItems: 'center' }}
         >
           <Likes />
         </Button>
