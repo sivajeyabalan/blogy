@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, Button, Paper, Grid, Typography, Container, Box } from "@mui/material";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useDispatch } from "react-redux";
@@ -22,6 +22,30 @@ const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    // When switching between Sign In and Sign Up
+    const switchMode = () => {
+        setIsSignup((prevIsSignup) => !prevIsSignup);
+        setShowPassword(false);
+        setFormData({
+            firstName: "",
+            lastName: "",
+            email: formData.email, // Preserve email value across switches
+            password: "",
+            confirmPassword: "",
+        });
+    };
+
+    useEffect(() => {
+        // Reset form if coming from redirect after error handling in actions/auth.js
+        setFormData({
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+        });
+    }, [isSignup]); // Reset fields whenever switching between Sign Up / Sign In
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isSignup) {
@@ -36,12 +60,6 @@ const Auth = () => {
     };
 
     const handleShowPassword = () => setShowPassword((prev) => !prev);
-
-    const switchMode = () => {
-        setFormData(initialState);
-        setIsSignup((prevIsSignup) => !prevIsSignup);
-        setShowPassword(false);
-    };
 
     return (
         <ThemeProvider theme={theme}>
@@ -62,7 +80,7 @@ const Auth = () => {
                                         <Input name="lastName" label="Last Name" handleChange={handleChange} half />
                                     </>
                                 )}
-                                <Input name="email" label="Email Address" handleChange={handleChange} type="email" />
+                                <Input name="email" label="Email Address" handleChange={handleChange} type="email" value={formData.email} />
                                 <Input name="password" label="Password" handleChange={handleChange} type={showPassword ? "text" : "password"} handleShowPassword={handleShowPassword} />
                                 {isSignup && <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type="password" />}
                             </Grid>
@@ -70,6 +88,33 @@ const Auth = () => {
                             <Button type="submit" fullWidth variant="contained" className={classes.submit} sx={{ mt: 2 }}>
                                 {isSignup ? "Sign Up" : "Sign In"}
                             </Button>
+
+                            <Box className={classes.googleButtonWrapper} sx={{ mt: 2 }}>
+                                <GoogleLogin
+                                    onSuccess={(credentialResponse) => {
+                                        const token = credentialResponse.credential;
+                                        const decoded = jwtDecode(token);
+                                        const userData = {
+                                            result: {
+                                                email: decoded.email,
+                                                name: decoded.name,
+                                                googleId: decoded.sub,
+                                                imageUrl: decoded.picture,
+                                            },
+                                            token,
+                                        };
+                                        dispatch({ type: "AUTH", data: userData });
+                                        localStorage.setItem("profile", JSON.stringify(userData));
+                                        navigate("/");
+                                    }}
+                                    onError={() => alert("Google Sign In was unsuccessful. Try again later.")}
+                                    theme="filled_blue"
+                                    shape="pill"
+                                    style={{ color: "white", padding: "10px", borderRadius: "5px" }}
+                                    useOneTap
+                                    redirectUri="https://your-redirect-uri.com"
+                                />
+                            </Box>
 
                             <Button onClick={switchMode} fullWidth sx={{ mt: 2 }}>
                                 {isSignup ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
