@@ -23,7 +23,9 @@ export const signup = (formData, navigate) => async (dispatch) => {
 
 export const googleSignIn = (token, navigate) => async (dispatch) => {
   try {
-    const { data } = await api.googleSignIn(token); // Send token to backend
+    const { data } = await api.googleSignIn(token);
+    console.log("Google SignIn Response:", data);
+
     dispatch({ type: AUTH, data });
     localStorage.setItem("profile", JSON.stringify(data));
     navigate("/");

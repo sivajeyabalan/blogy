@@ -69,6 +69,7 @@ export const googleSignIn = async (req, res) => {
     const { email, name, picture, sub: googleId } = decoded;
 
     let user = await User.findOne({ email });
+    console.log(user);
 
     if (!user) {
       // If the user does not exist, create a new user
