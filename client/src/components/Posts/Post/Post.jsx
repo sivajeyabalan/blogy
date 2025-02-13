@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardActions,
   CardContent,
-  CardMedia,
   Button,
   Typography,
   Box,
@@ -23,6 +22,29 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
   const [imageError, setImageError] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+
+  useEffect(() => {
+    // Debug logging
+    console.log('Post ID:', post._id);
+    console.log('Original Image Source:', post.selectedFile);
+
+    if (post.selectedFile) {
+      // Check if it's a base64 string
+      if (post.selectedFile.startsWith('data:image')) {
+        setImageUrl(post.selectedFile);
+      }
+      // Check if it's a URL
+      else if (post.selectedFile.startsWith('http')) {
+        setImageUrl(post.selectedFile);
+      }
+      // If neither, log error
+      else {
+        console.error('Invalid image format:', post.selectedFile.substring(0, 50) + '...');
+        setImageError(true);
+      }
+    }
+  }, [post.selectedFile]);
 
   const Likes = () => {
     if (post?.likes?.length > 0) {
@@ -35,9 +57,51 @@ const Post = ({ post, setCurrentId }) => {
 
   const openPost = () => navigate(`/posts/${post._id}`);
 
-  // Handle image loading error
-  const handleImageError = () => {
+  const handleImageError = (e) => {
+    console.error('Image load error:', e);
     setImageError(true);
+  };
+
+  const renderImage = () => {
+    if (imageError || !imageUrl) {
+      return (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(0, 0, 0, 0.12)',
+          }}
+        >
+          <Typography variant="body2" color="textSecondary">
+            No image available
+          </Typography>
+        </Box>
+      );
+    }
+
+    return (
+      <img
+        src={imageUrl}
+        alt={post.title}
+        onError={handleImageError}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+        }}
+        loading="lazy"
+        crossOrigin="anonymous"
+      />
+    );
   };
 
   return (
@@ -61,45 +125,12 @@ const Post = ({ post, setCurrentId }) => {
         sx={{
           cursor: 'pointer',
           position: 'relative',
-          paddingTop: '56.25%', // 16:9 aspect ratio
+          paddingTop: '56.25%',
           backgroundColor: 'rgba(0, 0, 0, 0.08)',
           overflow: 'hidden',
         }}
       >
-        {post.selectedFile && !imageError ? (
-          <img
-            src={post.selectedFile}
-            alt={post.title}
-            onError={handleImageError}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-            loading="lazy"
-          />
-        ) : (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              bgcolor: 'rgba(0, 0, 0, 0.12)',
-            }}
-          >
-            <Typography variant="body2" color="textSecondary">
-              No image available
-            </Typography>
-          </Box>
-        )}
+        {renderImage()}
       </Box>
 
       <CardContent sx={{ flexGrow: 1, pt: 2 }}>
