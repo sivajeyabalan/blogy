@@ -16,10 +16,13 @@ const Input = ({ name, half, handleChange, autoFocus, type, label, handleShowPas
                 autoFocus={autoFocus}
                 type={type}
                 value={value || ''}
-                InputProps={name === 'password' ? {
+                InputProps={name === 'password' || name === 'confirmPassword' ? {
                     endAdornment: (
                         <InputAdornment position='end'>
-                            <IconButton onClick={handleShowPassword}>
+                            <IconButton
+                                onClick={handleShowPassword}
+                                aria-label={type === "password" ? "show password" : "hide password"}
+                            >
                                 {type === "password" ? <Visibility /> : <VisibilityOff />}
                             </IconButton>
                         </InputAdornment>

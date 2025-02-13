@@ -1,3 +1,42 @@
+// Input.js
+import React from 'react';
+import { TextField, Grid, InputAdornment, IconButton } from '@mui/material';
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+
+const Input = ({ name, half, handleChange, autoFocus, type, label, handleShowPassword, value }) => {
+    return (
+        <Grid item xs={12} sm={half ? 6 : 12}>
+            <TextField
+                name={name}
+                onChange={handleChange}
+                variant="outlined"
+                required
+                fullWidth
+                label={label}
+                autoFocus={autoFocus}
+                type={type}
+                value={value || ''}
+                InputProps={name === 'password' || name === 'confirmPassword' ? {
+                    endAdornment: (
+                        <InputAdornment position='end'>
+                            <IconButton
+                                onClick={handleShowPassword}
+                                aria-label={type === "password" ? "show password" : "hide password"}
+                            >
+                                {type === "password" ? <Visibility /> : <VisibilityOff />}
+                            </IconButton>
+                        </InputAdornment>
+                    )
+                } : null}
+            />
+        </Grid>
+    );
+};
+
+export default Input;
+
+// Auth.js
 import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Paper, Grid, Typography, Container, Box, Alert } from '@mui/material';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
@@ -19,6 +58,7 @@ const Auth = () => {
     const [formData, setFormData] = useState(initialState);
     const [isSignup, setIsSignup] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [savedState, setSavedState] = useState(null);
     const dispatch = useDispatch();
@@ -38,7 +78,6 @@ const Auth = () => {
                     .catch((err) => {
                         if (err?.response?.data?.message === 'User already exists') {
                             setError('An account with this email already exists. Please sign in.');
-                            // Save current state before switching
                             setSavedState({ email: formData.email, password: formData.password });
                             setTimeout(() => setIsSignup(false), 1000);
                         } else {
@@ -50,7 +89,6 @@ const Auth = () => {
                     .catch((err) => {
                         if (err?.response?.data?.message === "User doesn't exist") {
                             setError('Account not found. Please sign up first.');
-                            // Save current state before switching
                             setSavedState({ email: formData.email, password: formData.password });
                             setTimeout(() => setIsSignup(true), 1000);
                         } else if (err?.response?.data?.message === 'Invalid credentials') {
@@ -68,23 +106,26 @@ const Auth = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        setError(''); // Clear error when user types
+        setError('');
     };
 
     const handleShowPassword = () => setShowPassword((prev) => !prev);
+    const handleShowConfirmPassword = () => setShowConfirmPassword((prev) => !prev);
 
     const switchMode = () => {
         if (savedState) {
-            // Preserve email and password when switching modes
             const newFormData = {
                 ...initialState,
                 email: savedState.email,
                 password: savedState.password
             };
             setFormData(newFormData);
+        } else {
+            setFormData(initialState);
         }
         setIsSignup((prevIsSignup) => !prevIsSignup);
         setShowPassword(false);
+        setShowConfirmPassword(false);
         setError('');
     };
 
@@ -119,12 +160,12 @@ const Auth = () => {
     return (
         <ThemeProvider theme={theme}>
             <GoogleOAuthProvider clientId="748632032018-jajhqq9kvlmegvn34dj0kvad2go0lq5f.apps.googleusercontent.com">
-                <Container component='main' maxWidth='xs'>
+                <Container component="main" maxWidth="xs">
                     <Paper className={classes.paper} elevation={3}>
                         <Avatar className={classes.avatar}>
                             <LockOutlinedIcon />
                         </Avatar>
-                        <Typography component='h1' variant='h5'>
+                        <Typography component="h1" variant="h5">
                             {isSignup ? 'Sign Up' : 'Sign In'}
                         </Typography>
                         {error && (
@@ -136,20 +177,34 @@ const Auth = () => {
                             <Grid container spacing={2}>
                                 {isSignup && (
                                     <>
-                                        <Input name='firstName' label='First Name' handleChange={handleChange} autoFocus half />
-                                        <Input name='lastName' label='Last Name' handleChange={handleChange} half />
+                                        <Input
+                                            name="firstName"
+                                            label="First Name"
+                                            handleChange={handleChange}
+                                            autoFocus
+                                            half
+                                            value={formData.firstName}
+                                        />
+                                        <Input
+                                            name="lastName"
+                                            label="Last Name"
+                                            handleChange={handleChange}
+                                            half
+                                            value={formData.lastName}
+                                        />
                                     </>
                                 )}
                                 <Input
-                                    name='email'
-                                    label='Email Address'
+                                    name="email"
+                                    label="Email Address"
                                     handleChange={handleChange}
-                                    type='email'
+                                    type="email"
                                     value={formData.email}
+                                    autoFocus={!isSignup}
                                 />
                                 <Input
-                                    name='password'
-                                    label='Password'
+                                    name="password"
+                                    label="Password"
                                     handleChange={handleChange}
                                     type={showPassword ? 'text' : 'password'}
                                     handleShowPassword={handleShowPassword}
@@ -157,19 +212,20 @@ const Auth = () => {
                                 />
                                 {isSignup && (
                                     <Input
-                                        name='confirmPassword'
-                                        label='Repeat Password'
+                                        name="confirmPassword"
+                                        label="Repeat Password"
                                         handleChange={handleChange}
-                                        type='password'
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        handleShowPassword={handleShowConfirmPassword}
                                         value={formData.confirmPassword}
                                     />
                                 )}
                             </Grid>
 
                             <Button
-                                type='submit'
+                                type="submit"
                                 fullWidth
-                                variant='contained'
+                                variant="contained"
                                 className={classes.submit}
                                 sx={{ mt: 2 }}
                             >
@@ -182,11 +238,6 @@ const Auth = () => {
                                     onError={googleFailure}
                                     theme="filled_blue"
                                     shape="pill"
-                                    style={{
-                                        color: 'white',
-                                        padding: '10px',
-                                        borderRadius: '5px'
-                                    }}
                                     useOneTap
                                     redirectUri="https://memories-project-client-mar8y1yk4-nitheeshlingam-rs-projects.vercel.app"
                                 />
