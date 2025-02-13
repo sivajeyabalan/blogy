@@ -10,7 +10,12 @@ export const signin = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (!existingUser)
-      return res.status(404).json({ message: "User doesn't exist" });
+      return res
+        .status(400)
+        .json({
+          message: "User doesn't exist. Please register.",
+          redirect: "signup",
+        });
 
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -37,8 +42,14 @@ export const signup = async (req, res) => {
 
   try {
     const existingUser = await User.findOne({ email });
+
     if (existingUser)
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(400)
+        .json({
+          message: "User already exists. Please sign in.",
+          redirect: "signin",
+        });
 
     if (password !== confirmPassword)
       return res.status(400).json({ message: "Passwords didn't match" });
@@ -55,7 +66,7 @@ export const signup = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ result: result, token });
+    res.status(200).json({ result, token });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
   }
