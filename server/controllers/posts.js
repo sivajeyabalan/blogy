@@ -24,12 +24,10 @@ export const getPosts = async (req, res) => {
     const startIndex = (Number(page) - 1) * LIMIT;
     const total = await PostMessage.countDocuments({});
     const posts_s = await PostMessage.find(); // This should return all posts if there are any
-    console.log(posts_s);
     const posts = await PostMessage.find()
       .sort({ _id: -1 })
       .limit(LIMIT)
       .skip(startIndex);
-    console.log("Posts from MongoDB:", posts); // Debugging
     res.json({
       data: posts,
       currentPage: Number(page),
@@ -48,16 +46,13 @@ export const getPostsBySearch = async (req, res) => {
       $or: [{ title }, { tags: { $in: tags.split(",") } }],
     });
 
-    console.log("Posts Found:", posts);
     res.json({ data: posts });
   } catch (error) {
-    console.log("Error in getPostsBySearch:", error);
     res.status(404).json({ message: error.message });
   }
 };
 
 export const createPost = async (req, res) => {
-  console.log("Received Post Data:", req.body); // Debugging
   const { title, message, tags, selectedFile, name } = req.body;
 
   if (!req.userId) {
@@ -67,15 +62,12 @@ export const createPost = async (req, res) => {
   try {
     let imageUrl = selectedFile;
     if (selectedFile) {
-      console.log("Uploading Image to Cloudinary..."); // Debugging
       const uploadResponse = await cloudinary.uploader.upload(selectedFile, {
         folder: "MemoriesApp",
         resource_type: "auto",
       });
       imageUrl = uploadResponse.secure_url;
     }
-
-    console.log("Final Image URL:", imageUrl); // Debugging
 
     const newPost = new PostMessage({
       title,
@@ -90,7 +82,6 @@ export const createPost = async (req, res) => {
     });
 
     await newPost.save();
-    console.log("Post Created:", newPost); // Debugging
     res.status(201).json(newPost);
   } catch (error) {
     console.error("Error Creating Post:", error);

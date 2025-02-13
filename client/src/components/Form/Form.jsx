@@ -71,7 +71,6 @@ const Form = ({ currentId, setCurrentId }) => {
         },
       });
 
-      console.log("Cloudinary Response:", res.data); // Debugging
       setPostData({ ...postData, selectedFile: res.data.secure_url }); // Store Cloudinary URL
     } catch (error) {
       console.error("Image Upload Error:", error.response ? error.response.data : error.message);

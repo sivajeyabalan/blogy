@@ -10,12 +10,10 @@ export const signin = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (!existingUser)
-      return res
-        .status(400)
-        .json({
-          message: "User doesn't exist. Please register.",
-          redirect: "signup",
-        });
+      return res.status(400).json({
+        message: "User doesn't exist. Please register.",
+        redirect: "signup",
+      });
 
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -44,12 +42,10 @@ export const signup = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser)
-      return res
-        .status(400)
-        .json({
-          message: "User already exists. Please sign in.",
-          redirect: "signin",
-        });
+      return res.status(400).json({
+        message: "User already exists. Please sign in.",
+        redirect: "signin",
+      });
 
     if (password !== confirmPassword)
       return res.status(400).json({ message: "Passwords didn't match" });
@@ -80,7 +76,6 @@ export const googleSignIn = async (req, res) => {
     const { email, name, picture, sub: googleId } = decoded;
 
     let user = await User.findOne({ email });
-    console.log(user);
 
     if (!user) {
       // If the user does not exist, create a new user
