@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Avatar, Button, Paper, Grid, Typography, Container, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Avatar, Button, Paper, Grid, Typography, Container, Box, Alert } from '@mui/material';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useDispatch } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
@@ -19,28 +19,73 @@ const Auth = () => {
     const [formData, setFormData] = useState(initialState);
     const [isSignup, setIsSignup] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [savedState, setSavedState] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isSignup) {
-            dispatch(signup(formData, navigate));
-        } else {
-            dispatch(signin(formData, navigate));
+        setError('');
+
+        try {
+            if (isSignup) {
+                if (formData.password !== formData.confirmPassword) {
+                    setError("Passwords don't match");
+                    return;
+                }
+                await dispatch(signup(formData, navigate))
+                    .catch((err) => {
+                        if (err?.response?.data?.message === 'User already exists') {
+                            setError('An account with this email already exists. Please sign in.');
+                            // Save current state before switching
+                            setSavedState({ email: formData.email, password: formData.password });
+                            setTimeout(() => setIsSignup(false), 1000);
+                        } else {
+                            setError(err?.response?.data?.message || 'Signup failed. Please try again.');
+                        }
+                    });
+            } else {
+                await dispatch(signin(formData, navigate))
+                    .catch((err) => {
+                        if (err?.response?.data?.message === "User doesn't exist") {
+                            setError('Account not found. Please sign up first.');
+                            // Save current state before switching
+                            setSavedState({ email: formData.email, password: formData.password });
+                            setTimeout(() => setIsSignup(true), 1000);
+                        } else if (err?.response?.data?.message === 'Invalid credentials') {
+                            setError('Invalid email or password.');
+                        } else {
+                            setError(err?.response?.data?.message || 'Sign in failed. Please try again.');
+                        }
+                    });
+            }
+        } catch (error) {
+            console.error('Auth Error:', error);
+            setError('Authentication failed. Please try again.');
         }
     };
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        setError(''); // Clear error when user types
     };
 
     const handleShowPassword = () => setShowPassword((prev) => !prev);
 
     const switchMode = () => {
-        setFormData(initialState);
+        if (savedState) {
+            // Preserve email and password when switching modes
+            const newFormData = {
+                ...initialState,
+                email: savedState.email,
+                password: savedState.password
+            };
+            setFormData(newFormData);
+        }
         setIsSignup((prevIsSignup) => !prevIsSignup);
         setShowPassword(false);
+        setError('');
     };
 
     const googleSuccess = async (credentialResponse) => {
@@ -63,11 +108,12 @@ const Auth = () => {
             navigate("/");
         } catch (error) {
             console.error("Google Sign In Error:", error);
+            setError('Google sign in failed. Please try again.');
         }
     };
 
     const googleFailure = () => {
-        alert('Google Sign In was unsuccessful. Try again later.');
+        setError('Google Sign In was unsuccessful. Please try again.');
     };
 
     return (
@@ -81,6 +127,11 @@ const Auth = () => {
                         <Typography component='h1' variant='h5'>
                             {isSignup ? 'Sign Up' : 'Sign In'}
                         </Typography>
+                        {error && (
+                            <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+                                {error}
+                            </Alert>
+                        )}
                         <form className={classes.form} onSubmit={handleSubmit}>
                             <Grid container spacing={2}>
                                 {isSignup && (
@@ -89,9 +140,30 @@ const Auth = () => {
                                         <Input name='lastName' label='Last Name' handleChange={handleChange} half />
                                     </>
                                 )}
-                                <Input name='email' label='Email Address' handleChange={handleChange} type='email' />
-                                <Input name='password' label='Password' handleChange={handleChange} type={showPassword ? 'text' : 'password'} handleShowPassword={handleShowPassword} />
-                                {isSignup && <Input name='confirmPassword' label='Repeat Password' handleChange={handleChange} type='password' />}
+                                <Input
+                                    name='email'
+                                    label='Email Address'
+                                    handleChange={handleChange}
+                                    type='email'
+                                    value={formData.email}
+                                />
+                                <Input
+                                    name='password'
+                                    label='Password'
+                                    handleChange={handleChange}
+                                    type={showPassword ? 'text' : 'password'}
+                                    handleShowPassword={handleShowPassword}
+                                    value={formData.password}
+                                />
+                                {isSignup && (
+                                    <Input
+                                        name='confirmPassword'
+                                        label='Repeat Password'
+                                        handleChange={handleChange}
+                                        type='password'
+                                        value={formData.confirmPassword}
+                                    />
+                                )}
                             </Grid>
 
                             <Button
@@ -99,7 +171,7 @@ const Auth = () => {
                                 fullWidth
                                 variant='contained'
                                 className={classes.submit}
-                                sx={{ mt: 2 }} // Added margin-top for spacing
+                                sx={{ mt: 2 }}
                             >
                                 {isSignup ? 'Sign Up' : 'Sign In'}
                             </Button>
@@ -123,7 +195,7 @@ const Auth = () => {
                             <Button
                                 onClick={switchMode}
                                 fullWidth
-                                sx={{ mt: 2 }} // Added margin-top for spacing
+                                sx={{ mt: 2 }}
                             >
                                 {isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
                             </Button>

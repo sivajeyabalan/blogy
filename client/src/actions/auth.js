@@ -7,7 +7,8 @@ export const signin = (formData, navigate) => async (dispatch) => {
     dispatch({ type: AUTH, data });
     navigate("/");
   } catch (error) {
-    console.log(error);
+    console.error("Sign in error:", error);
+    throw error;
   }
 };
 
@@ -17,17 +18,19 @@ export const signup = (formData, navigate) => async (dispatch) => {
     dispatch({ type: AUTH, data });
     navigate("/");
   } catch (error) {
-    console.log(error);
+    console.error("Sign up error:", error);
+    throw error;
   }
 };
 
 export const googleSignIn = (token, navigate) => async (dispatch) => {
   try {
-    const { data } = await api.googleSignIn(token); // Send token to backend
+    const { data } = await api.googleSignIn(token);
     dispatch({ type: AUTH, data });
     localStorage.setItem("profile", JSON.stringify(data));
     navigate("/");
   } catch (error) {
-    console.log(error);
+    console.error("Google sign in error:", error);
+    throw error;
   }
 };
