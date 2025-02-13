@@ -35,17 +35,6 @@ const Auth = () => {
         });
     };
 
-    useEffect(() => {
-        // Reset form fields if user switches between Sign Up and Sign In
-        setFormData({
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
-        });
-    }, [isSignup]); // Reset fields whenever switching between Sign Up / Sign In
-
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isSignup) {
@@ -80,8 +69,20 @@ const Auth = () => {
                                         <Input name="lastName" label="Last Name" handleChange={handleChange} half />
                                     </>
                                 )}
-                                <Input name="email" label="Email Address" handleChange={handleChange} type="email" value={formData.email} />
-                                <Input name="password" label="Password" handleChange={handleChange} type={showPassword ? "text" : "password"} handleShowPassword={handleShowPassword} />
+                                <Input
+                                    name="email"
+                                    label="Email Address"
+                                    handleChange={handleChange}
+                                    type="email"
+                                    value={formData.email} // Ensure email is controlled
+                                />
+                                <Input
+                                    name="password"
+                                    label="Password"
+                                    handleChange={handleChange}
+                                    type={showPassword ? "text" : "password"}
+                                    handleShowPassword={handleShowPassword}
+                                />
                                 {isSignup && <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type="password" />}
                             </Grid>
 
