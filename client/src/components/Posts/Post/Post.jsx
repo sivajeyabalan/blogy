@@ -1,3 +1,5 @@
+
+// Post.js
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -25,20 +27,13 @@ const Post = ({ post, setCurrentId }) => {
   const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
-    // Debug logging
-    console.log('Post ID:', post._id);
-    console.log('Original Image Source:', post.selectedFile);
-
     if (post.selectedFile) {
-      // Check if it's a base64 string
       if (post.selectedFile.startsWith('data:image')) {
         setImageUrl(post.selectedFile);
       }
-      // Check if it's a URL
       else if (post.selectedFile.startsWith('http')) {
         setImageUrl(post.selectedFile);
       }
-      // If neither, log error
       else {
         console.error('Invalid image format:', post.selectedFile.substring(0, 50) + '...');
         setImageError(true);
@@ -46,12 +41,26 @@ const Post = ({ post, setCurrentId }) => {
     }
   }, [post.selectedFile]);
 
-  const Likes = () => {
+  const getLikeContent = () => {
     if (post?.likes?.length > 0) {
-      return post.likes.includes(userId)
-        ? (<><ThumbUpAltIcon fontSize="small" /> {post.likes.length} {post.likes.length > 1 ? 'Likes' : 'Like'}</>)
-        : (<><ThumbUpAltOutlined fontSize="small" /> {post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</>);
+      return post.likes.includes(userId) ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ThumbUpAltIcon fontSize="small" />
+          <span>{post.likes.length} {post.likes.length > 1 ? 'Likes' : 'Like'}</span>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ThumbUpAltOutlined fontSize="small" />
+          <span>{post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</span>
+        </Box>
+      );
     }
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <ThumbUpAltOutlined fontSize="small" />
+        <span>Like</span>
+      </Box>
+    );
   };
 
   const openPost = () => navigate(`/posts/${post._id}`);
@@ -167,9 +176,8 @@ const Post = ({ post, setCurrentId }) => {
           color="primary"
           disabled={!user?.result}
           onClick={() => dispatch(likePost(post._id))}
-          startIcon={<ThumbUpAltOutlined />}
         >
-          <Likes />
+          {getLikeContent()}
         </Button>
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (

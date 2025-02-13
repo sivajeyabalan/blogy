@@ -8,7 +8,6 @@ const Posts = ({ setCurrentId }) => {
   const { posts, isLoading } = useSelector((state) => state.posts);
   const classes = useStyles();
 
-  // Check if posts is undefined or empty, and handle the loading state
   if (!posts?.length && !isLoading) return 'No posts';
   console.log(posts);
 
