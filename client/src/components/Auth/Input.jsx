@@ -3,7 +3,7 @@ import { TextField, Grid, InputAdornment, IconButton } from '@mui/material';
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-const Input = ({ name, half, handleChange, autoFocus, type, label, handleShowPassword }) => {
+const Input = ({ name, half, handleChange, autoFocus, type, label, handleShowPassword, value }) => {
     return (
         <Grid item xs={12} sm={half ? 6 : 12}>
             <TextField
@@ -15,6 +15,7 @@ const Input = ({ name, half, handleChange, autoFocus, type, label, handleShowPas
                 label={label}
                 autoFocus={autoFocus}
                 type={type}
+                value={value || ''} // Add controlled value prop with fallback
                 InputProps={name === 'password' ? {
                     endAdornment: (
                         <InputAdornment position='end'>
@@ -23,7 +24,7 @@ const Input = ({ name, half, handleChange, autoFocus, type, label, handleShowPas
                             </IconButton>
                         </InputAdornment>
                     )
-                } : null}  // Ensure InputProps is always an object
+                } : null}
             />
         </Grid>
     );
