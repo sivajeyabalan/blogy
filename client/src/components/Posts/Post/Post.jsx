@@ -23,28 +23,49 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
 
-  // Local state to store likes to prevent UI flickering
-  const [likes, setLikes] = useState(post.likes || []);
-  const [hasLiked, setHasLiked] = useState(post.likes.includes(userId));
+  // Like functionality from the given reference code
+  const [likes, setLikes] = useState(post?.likes || []);
 
-  // Update UI when Redux updates
   useEffect(() => {
-    setLikes(post.likes || []);
-    setHasLiked(post.likes.includes(userId));
+    setLikes(post?.likes || []);
   }, [post.likes]);
+
+  const hasLikedPost = likes.includes(userId);
 
   const handleLike = async () => {
     dispatch(likePost(post._id));
 
-    // Update UI optimistically
-    if (hasLiked) {
-      setLikes((prevLikes) => prevLikes.filter((id) => id !== userId));
+    if (hasLikedPost) {
+      setLikes(likes.filter((id) => id !== userId));
     } else {
-      setLikes((prevLikes) => [...prevLikes, userId]);
+      setLikes([...likes, userId]);
+    }
+  };
+
+  const Likes = () => {
+    if (likes.length > 0) {
+      return likes.find((like) => like === userId) ? (
+        <>
+          <ThumbUpAltIcon fontSize="small" />
+          &nbsp;
+          {likes.length > 2
+            ? `You and ${likes.length - 1} others`
+            : `${likes.length} like${likes.length > 1 ? "s" : ""}`}
+        </>
+      ) : (
+        <>
+          <ThumbUpAltOutlined fontSize="small" />
+          &nbsp;{likes.length} {likes.length === 1 ? "Like" : "Likes"}
+        </>
+      );
     }
 
-    // Toggle like state
-    setHasLiked(!hasLiked);
+    return (
+      <>
+        <ThumbUpAltOutlined fontSize="small" />
+        &nbsp;Like
+      </>
+    );
   };
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -179,8 +200,7 @@ const Post = ({ post, setCurrentId }) => {
 
       <CardActions sx={{ p: 2, pt: 0 }}>
         <Button size="small" color="primary" disabled={!user?.result} onClick={handleLike}>
-          {hasLiked ? <ThumbUpAltIcon color="primary" fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />}
-          &nbsp;Likes&nbsp;{likes.length}
+          <Likes />
         </Button>
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
