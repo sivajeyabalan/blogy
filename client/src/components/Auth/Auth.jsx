@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Avatar, Button, Paper, Grid, Typography, Container, Box } from "@mui/material";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useDispatch } from "react-redux";
@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
-import { signin, signup } from "../../actions/auth";
+import { signin, signup, googleSignIn } from "../../actions/auth";
 import { useStyles } from "./Styles";
 import Input from "./Input";
 
@@ -22,9 +22,8 @@ const Auth = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // When switching between Sign In and Sign Up
     const switchMode = () => {
-        setFormData(initialState); // Reset all form fields
+        setFormData(initialState);
         setIsSignup((prevIsSignup) => !prevIsSignup);
         setShowPassword(false);
     };
@@ -32,9 +31,9 @@ const Auth = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isSignup) {
-            dispatch(signup(formData, navigate, setIsSignup, setFormData));
+            dispatch(signup(formData, navigate));
         } else {
-            dispatch(signin(formData, navigate, setIsSignup, setFormData));
+            dispatch(signin(formData, navigate));
         }
     };
 
@@ -43,6 +42,27 @@ const Auth = () => {
     };
 
     const handleShowPassword = () => setShowPassword((prev) => !prev);
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            const token = credentialResponse.credential;
+            const decoded = jwtDecode(token);
+
+            // Create user data from Google response
+            const googleUser = {
+                email: decoded.email,
+                name: decoded.name,
+                googleId: decoded.sub,
+                picture: decoded.picture,
+            };
+
+            // Dispatch googleSignIn action
+            dispatch(googleSignIn(googleUser, navigate));
+        } catch (error) {
+            console.log("Google Sign In Error:", error);
+            alert("Google Sign In failed. Please try again.");
+        }
+    };
 
     return (
         <ThemeProvider theme={theme}>
@@ -108,28 +128,12 @@ const Auth = () => {
 
                             <Box className={classes.googleButtonWrapper} sx={{ mt: 2 }}>
                                 <GoogleLogin
-                                    onSuccess={(credentialResponse) => {
-                                        const token = credentialResponse.credential;
-                                        const decoded = jwtDecode(token);
-                                        const userData = {
-                                            result: {
-                                                email: decoded.email,
-                                                name: decoded.name,
-                                                googleId: decoded.sub,
-                                                imageUrl: decoded.picture,
-                                            },
-                                            token,
-                                        };
-                                        dispatch({ type: "AUTH", data: userData });
-                                        localStorage.setItem("profile", JSON.stringify(userData));
-                                        navigate("/");
-                                    }}
+                                    onSuccess={handleGoogleSuccess}
                                     onError={() => alert("Google Sign In was unsuccessful. Try again later.")}
                                     theme="filled_blue"
                                     shape="pill"
                                     style={{ color: "white", padding: "10px", borderRadius: "5px" }}
                                     useOneTap
-                                    redirectUri="https://your-redirect-uri.com"
                                 />
                             </Box>
 

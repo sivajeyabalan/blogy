@@ -4,14 +4,12 @@ const API = axios.create({
   baseURL: "https://memories-project-server.vercel.app/",
 });
 
-//baseURL: import.meta.env.VITE_SERVER_APP_URL,
 API.interceptors.request.use((req) => {
   if (localStorage.getItem("profile")) {
     req.headers.Authorization = `Bearer ${
       JSON.parse(localStorage.getItem("profile")).token
     }`;
   }
-
   return req;
 });
 
@@ -35,5 +33,5 @@ export const deletePost = (id) => API.delete(`/posts/${id}`);
 
 export const signIn = (formData) => API.post("/user/signin", formData);
 export const signUp = (formData) => API.post("/user/signup", formData);
-export const googleSignIn = (token) =>
-  API.post("/user/googleSignIn", { token });
+export const googleSignIn = (userData) =>
+  API.post("/user/googleSignIn", userData);

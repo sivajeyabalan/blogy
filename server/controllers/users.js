@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
 import User from "../models/user.js";
+
+const secret = "test"; // In production, use environment variable
 
 export const signin = async (req, res) => {
   const { email, password } = req.body;
@@ -10,10 +11,7 @@ export const signin = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (!existingUser)
-      return res.status(400).json({
-        message: "User doesn't exist. Please register.",
-        redirect: "signup",
-      });
+      return res.status(404).json({ message: "User doesn't exist" });
 
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -21,11 +19,11 @@ export const signin = async (req, res) => {
     );
 
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: "Invalid Credentials" });
+      return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
-      "test",
+      secret,
       { expiresIn: "1h" }
     );
 
@@ -42,13 +40,10 @@ export const signup = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser)
-      return res.status(400).json({
-        message: "User already exists. Please sign in.",
-        redirect: "signin",
-      });
+      return res.status(400).json({ message: "User already exists" });
 
     if (password !== confirmPassword)
-      return res.status(400).json({ message: "Passwords didn't match" });
+      return res.status(400).json({ message: "Passwords don't match" });
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -58,7 +53,7 @@ export const signup = async (req, res) => {
       name: `${firstName} ${lastName}`,
     });
 
-    const token = jwt.sign({ email: result.email, id: result._id }, "test", {
+    const token = jwt.sign({ email: result.email, id: result._id }, secret, {
       expiresIn: "1h",
     });
 
@@ -69,31 +64,44 @@ export const signup = async (req, res) => {
 };
 
 export const googleSignIn = async (req, res) => {
-  const { token } = req.body;
+  const { email, name, googleId, picture } = req.body;
 
   try {
-    const decoded = jwt.decode(token); // Decode JWT token from Google
-    const { email, name, picture, sub: googleId } = decoded;
+    // Check if user already exists
+    let existingUser = await User.findOne({ email });
 
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      // If the user does not exist, create a new user
-      user = await User.create({
-        name,
+    if (!existingUser) {
+      // Create new user if doesn't exist
+      const newUser = await User.create({
         email,
-        password: "GoogleAuth", // Dummy password since it's a Google user
-        googleId, // Store Google ID to identify Google-authenticated users
-        picture, // Store profile picture from Google
+        name,
+        googleId,
+        picture,
+        password: `google_${googleId}`, // Create a unique password
       });
+
+      existingUser = newUser;
+    } else {
+      // Update existing user's Google ID if not present
+      if (!existingUser.googleId) {
+        existingUser.googleId = googleId;
+        existingUser.picture = picture;
+        await existingUser.save();
+      }
     }
 
-    const newToken = jwt.sign({ email: user.email, id: user._id }, "test", {
-      expiresIn: "1h",
-    });
+    // Generate token
+    const token = jwt.sign(
+      { email: existingUser.email, id: existingUser._id },
+      secret,
+      { expiresIn: "1h" }
+    );
 
-    res.status(200).json({ result: user, token: newToken });
+    res.status(200).json({ result: existingUser, token });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    console.log("Google Sign In Error:", error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong with Google Sign In" });
   }
 };
