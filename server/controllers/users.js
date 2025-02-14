@@ -67,7 +67,6 @@ export const googleSignIn = async (req, res) => {
   const { email, name, googleId, picture } = req.body;
 
   try {
-    // Check if user already exists
     let existingUser = await User.findOne({ email });
 
     if (!existingUser) {
@@ -76,21 +75,20 @@ export const googleSignIn = async (req, res) => {
         email,
         name,
         googleId,
-        imageUrl: picture,
-        password: `google_${googleId}`, // Create a unique password
+        imageUrl: picture, // This is correct, matches schema
+        password: `google_${googleId}`,
       });
 
       existingUser = newUser;
     } else {
-      // Update existing user's Google ID if not present
-      if (!existingUser.googleId) {
+      // Update existing user's Google ID and picture if not present
+      if (!existingUser.googleId || !existingUser.imageUrl) {
         existingUser.googleId = googleId;
-        existingUser.picture = picture;
+        existingUser.imageUrl = picture; // Changed from picture to imageUrl
         await existingUser.save();
       }
     }
 
-    // Generate token
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
       secret,
