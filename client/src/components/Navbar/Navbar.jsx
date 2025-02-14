@@ -32,6 +32,7 @@ const Navbar = () => {
         }
         setUser(JSON.parse(localStorage.getItem("profile")));
     }, [location]);
+    console.log(user);
 
     const getAvatarContent = (user) => {
         if (!user?.result) return null;
