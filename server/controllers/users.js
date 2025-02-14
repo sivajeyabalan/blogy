@@ -76,7 +76,7 @@ export const googleSignIn = async (req, res) => {
         email,
         name,
         googleId,
-        picture,
+        imageUrl: picture,
         password: `google_${googleId}`, // Create a unique password
       });
 
