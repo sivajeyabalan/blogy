@@ -1,5 +1,3 @@
-
-// Post.js
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -8,6 +6,7 @@ import {
   Button,
   Typography,
   Box,
+  Skeleton,
 } from '@mui/material';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
@@ -23,55 +22,20 @@ const Post = ({ post, setCurrentId }) => {
   const user = JSON.parse(localStorage.getItem("profile"));
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [imageUrl, setImageUrl] = useState('');
 
-  useEffect(() => {
-    if (post.selectedFile) {
-      if (post.selectedFile.startsWith('data:image')) {
-        setImageUrl(post.selectedFile);
-      }
-      else if (post.selectedFile.startsWith('http')) {
-        setImageUrl(post.selectedFile);
-      }
-      else {
-        console.error('Invalid image format:', post.selectedFile.substring(0, 50) + '...');
-        setImageError(true);
-      }
-    }
-  }, [post.selectedFile]);
-
-  const getLikeContent = () => {
-    if (post?.likes?.length > 0) {
-      return post.likes.includes(userId) ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <ThumbUpAltIcon fontSize="small" />
-          <span>{post.likes.length} {post.likes.length > 1 ? 'Likes' : 'Like'}</span>
-        </Box>
-      ) : (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <ThumbUpAltOutlined fontSize="small" />
-          <span>{post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</span>
-        </Box>
-      );
-    }
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <ThumbUpAltOutlined fontSize="small" />
-        <span>Like</span>
-      </Box>
-    );
+  const handleImageLoad = () => {
+    setImageLoaded(true);
   };
 
-  const openPost = () => navigate(`/posts/${post._id}`);
-
-  const handleImageError = (e) => {
-    console.error('Image load error:', e);
+  const handleImageError = () => {
     setImageError(true);
+    setImageLoaded(true);
   };
 
   const renderImage = () => {
-    if (imageError || !imageUrl) {
+    if (imageError) {
       return (
         <Box
           sx={{
@@ -83,7 +47,7 @@ const Post = ({ post, setCurrentId }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: 'rgba(0, 0, 0, 0.12)',
+            bgcolor: 'rgba(0, 0, 0, 0.05)',
           }}
         >
           <Typography variant="body2" color="textSecondary">
@@ -94,21 +58,32 @@ const Post = ({ post, setCurrentId }) => {
     }
 
     return (
-      <img
-        src={imageUrl}
-        alt={post.title}
-        onError={handleImageError}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-        }}
-        loading="lazy"
-        crossOrigin="anonymous"
-      />
+      <>
+        {!imageLoaded && (
+          <Skeleton
+            variant="rectangular"
+            width="100%"
+            height="100%"
+            sx={{ position: 'absolute', top: 0, left: 0 }}
+          />
+        )}
+        <img
+          src={post.selectedFile}
+          alt={post.title}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: imageLoaded ? 'block' : 'none',
+          }}
+          loading="lazy"
+        />
+      </>
     );
   };
 
@@ -121,83 +96,79 @@ const Post = ({ post, setCurrentId }) => {
         position: 'relative',
         borderRadius: '15px',
         bgcolor: 'background.paper',
-        transition: 'transform 0.3s ease-in-out',
+        transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-5px)',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
         },
       }}
-      elevation={3}
+      elevation={2}
     >
       <Box
-        onClick={openPost}
+        onClick={() => navigate(`/posts/${post._id}`)}
         sx={{
           cursor: 'pointer',
           position: 'relative',
-          paddingTop: '56.25%',
-          backgroundColor: 'rgba(0, 0, 0, 0.08)',
+          paddingTop: '56.25%', // 16:9 aspect ratio
+          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          borderRadius: '15px 15px 0 0',
           overflow: 'hidden',
         }}
       >
         {renderImage()}
       </Box>
 
-      <CardContent sx={{ flexGrow: 1, pt: 2 }}>
-        <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-          Posted by {post.name} • {moment(post.createdAt).fromNow()}
+      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+        <Typography variant="body2" color="textSecondary" gutterBottom>
+          {moment(post.createdAt).fromNow()}
         </Typography>
 
-        <Typography variant="h6" component="h2" sx={{ mb: 1, fontWeight: 'bold' }}>
+        <Typography variant="h6" gutterBottom sx={{
+          fontWeight: 600,
+          fontSize: '1.1rem',
+          lineHeight: 1.2,
+          mb: 1
+        }}>
           {post.title}
         </Typography>
 
-        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
           {post.tags.map((tag) => `#${tag} `)}
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{
+        <Typography variant="body2" sx={{
+          color: 'text.secondary',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           display: '-webkit-box',
           WebkitLineClamp: 3,
           WebkitBoxOrient: 'vertical',
+          lineHeight: 1.5,
         }}>
           {post.message}
         </Typography>
       </CardContent>
 
-      <CardActions sx={{
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        px: 2,
-        pb: 2,
-      }}>
+      <CardActions sx={{ p: 2, pt: 0 }}>
         <Button
           size="small"
           color="primary"
           disabled={!user?.result}
           onClick={() => dispatch(likePost(post._id))}
         >
-          {getLikeContent()}
+          {post.likes?.includes(userId) ? <ThumbUpAltIcon fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />}
+          &nbsp;{post.likes?.length || 0}
         </Button>
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
-          <Box>
-            <Button
-              size="small"
-              color="primary"
-              onClick={() => setCurrentId(post._id)}
-              sx={{ mr: 1 }}
-            >
+          <>
+            <Button size="small" color="primary" onClick={() => setCurrentId(post._id)}>
               <EditIcon fontSize="small" />
             </Button>
-            <Button
-              size="small"
-              color="error"
-              onClick={() => dispatch(deletePost(post._id))}
-            >
+            <Button size="small" color="error" onClick={() => dispatch(deletePost(post._id))}>
               <DeleteIcon fontSize="small" />
             </Button>
-          </Box>
+          </>
         )}
       </CardActions>
     </Card>
