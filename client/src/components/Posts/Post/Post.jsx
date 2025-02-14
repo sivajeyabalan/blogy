@@ -81,7 +81,6 @@ const Post = ({ post, setCurrentId }) => {
             objectFit: 'cover',
             display: imageLoaded ? 'block' : 'none',
           }}
-          loading="lazy"
         />
       </>
     );
@@ -157,7 +156,7 @@ const Post = ({ post, setCurrentId }) => {
           onClick={() => dispatch(likePost(post._id))}
         >
           {post.likes?.includes(userId) ? <ThumbUpAltIcon fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />}
-          &nbsp;{post.likes?.length || 0}
+          &nbsp;Likes&nbsp;{post.likes?.length || 0}
         </Button>
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
