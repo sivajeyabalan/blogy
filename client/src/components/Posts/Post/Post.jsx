@@ -23,28 +23,41 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
 
-  // Like functionality from the given reference code
+  // Maintain local state for likes and loading
   const [likes, setLikes] = useState(post?.likes || []);
+  const [isLiking, setIsLiking] = useState(false);
+  const hasLikedPost = userId ? likes.includes(userId) : false;
 
   useEffect(() => {
     setLikes(post?.likes || []);
   }, [post.likes]);
 
-  const hasLikedPost = likes.includes(userId);
-
   const handleLike = async () => {
-    dispatch(likePost(post._id));
+    if (!userId) return;
+    if (isLiking) return; // Prevent multiple clicks while processing
 
-    if (hasLikedPost) {
-      setLikes(likes.filter((id) => id !== userId));
-    } else {
-      setLikes([...likes, userId]);
+    setIsLiking(true);
+
+    // Optimistically update UI
+    const newLikes = hasLikedPost
+      ? likes.filter((id) => id !== userId)
+      : [...likes, userId];
+    setLikes(newLikes);
+
+    try {
+      await dispatch(likePost(post._id));
+    } catch (error) {
+      // Revert on error
+      setLikes(likes);
+      console.error('Error liking post:', error);
+    } finally {
+      setIsLiking(false);
     }
   };
 
   const Likes = () => {
     if (likes.length > 0) {
-      return likes.find((like) => like === userId) ? (
+      return hasLikedPost ? (
         <>
           <ThumbUpAltIcon fontSize="small" />
           &nbsp;
@@ -68,6 +81,7 @@ const Post = ({ post, setCurrentId }) => {
     );
   };
 
+  // Rest of the component remains the same...
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -151,7 +165,7 @@ const Post = ({ post, setCurrentId }) => {
         sx={{
           cursor: 'pointer',
           position: 'relative',
-          paddingTop: '56.25%', // 16:9 aspect ratio
+          paddingTop: '56.25%',
           backgroundColor: 'rgba(0, 0, 0, 0.04)',
           borderRadius: '15px 15px 0 0',
           overflow: 'hidden',
@@ -199,7 +213,12 @@ const Post = ({ post, setCurrentId }) => {
       </CardContent>
 
       <CardActions sx={{ p: 2, pt: 0 }}>
-        <Button size="small" color="primary" disabled={!user?.result} onClick={handleLike}>
+        <Button
+          size="small"
+          color="primary"
+          disabled={!user?.result || isLiking}
+          onClick={handleLike}
+        >
           <Likes />
         </Button>
 
