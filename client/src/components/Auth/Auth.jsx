@@ -47,17 +47,17 @@ const Auth = () => {
         try {
             const token = credentialResponse.credential;
             const decoded = jwtDecode(token);
-            console.log("auth.jsx", decoded);
+            console.log("Google decoded data:", decoded);
 
             // Create user data from Google response
             const googleUser = {
                 email: decoded.email,
                 name: decoded.name,
                 googleId: decoded.sub,
-                picture: decoded.picture,
+                imageUrl: decoded.picture  // Changed from 'picture' to 'imageUrl' to match schema
             };
 
-            // Dispatch googleSignIn action
+            console.log("Sending to backend:", googleUser);
             dispatch(googleSignIn(googleUser, navigate));
         } catch (error) {
             console.log("Google Sign In Error:", error);

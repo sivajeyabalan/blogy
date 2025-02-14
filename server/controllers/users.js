@@ -64,10 +64,11 @@ export const signup = async (req, res) => {
 };
 
 export const googleSignIn = async (req, res) => {
-  const { email, name, googleId, picture } = req.body;
-  console.log("controller", picture);
+  const { email, name, googleId, imageUrl } = req.body; // Changed from 'picture' to 'imageUrl'
 
   try {
+    console.log("Received Google user data:", req.body);
+
     let existingUser = await User.findOne({ email });
 
     if (!existingUser) {
@@ -76,18 +77,18 @@ export const googleSignIn = async (req, res) => {
         email,
         name,
         googleId,
-        imageUrl: picture, // This is correct, matches schema
+        imageUrl, // Store the image URL
         password: `google_${googleId}`,
       });
 
+      console.log("Created new user:", newUser);
       existingUser = newUser;
     } else {
-      // Update existing user's Google ID and picture if not present
-      if (!existingUser.googleId || !existingUser.imageUrl) {
-        existingUser.googleId = googleId;
-        existingUser.imageUrl = picture; // Changed from picture to imageUrl
-        await existingUser.save();
-      }
+      // Always update the Google user's image URL
+      existingUser.googleId = googleId;
+      existingUser.imageUrl = imageUrl;
+      await existingUser.save();
+      console.log("Updated existing user:", existingUser);
     }
 
     const token = jwt.sign(
