@@ -23,65 +23,42 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
 
-  // Maintain local state for likes and loading
-  const [likes, setLikes] = useState(post?.likes || []);
-  const [isLiking, setIsLiking] = useState(false);
-  const hasLikedPost = userId ? likes.includes(userId) : false;
+  // Local state for likes and loading state
+  const [localLikes, setLocalLikes] = useState([]);
+  const [isProcessingLike, setIsProcessingLike] = useState(false);
 
+  // Update local likes when post changes
   useEffect(() => {
-    setLikes(post?.likes || []);
-  }, [post.likes]);
+    setLocalLikes(post?.likes || []);
+  }, [post._id]); // Only update when post ID changes to prevent infinite loops
+
+  // Check if current user has liked the post
+  const hasLikedPost = userId ? localLikes.includes(userId) : false;
 
   const handleLike = async () => {
-    if (!userId) return;
-    if (isLiking) return; // Prevent multiple clicks while processing
+    if (!userId || isProcessingLike) return;
 
-    setIsLiking(true);
+    setIsProcessingLike(true);
 
     // Optimistically update UI
     const newLikes = hasLikedPost
-      ? likes.filter((id) => id !== userId)
-      : [...likes, userId];
-    setLikes(newLikes);
+      ? localLikes.filter(id => id !== userId)
+      : [...localLikes, userId];
+
+    setLocalLikes(newLikes);
 
     try {
+      // Dispatch like action
       await dispatch(likePost(post._id));
     } catch (error) {
-      // Revert on error
-      setLikes(likes);
-      console.error('Error liking post:', error);
+      // Revert to previous state if action fails
+      setLocalLikes(localLikes);
+      console.error('Failed to update like:', error);
     } finally {
-      setIsLiking(false);
+      setIsProcessingLike(false);
     }
   };
 
-  const Likes = () => {
-    if (likes.length > 0) {
-      return hasLikedPost ? (
-        <>
-          <ThumbUpAltIcon fontSize="small" />
-          &nbsp;
-          {likes.length > 2
-            ? `You and ${likes.length - 1} others`
-            : `${likes.length} like${likes.length > 1 ? "s" : ""}`}
-        </>
-      ) : (
-        <>
-          <ThumbUpAltOutlined fontSize="small" />
-          &nbsp;{likes.length} {likes.length === 1 ? "Like" : "Likes"}
-        </>
-      );
-    }
-
-    return (
-      <>
-        <ThumbUpAltOutlined fontSize="small" />
-        &nbsp;Like
-      </>
-    );
-  };
-
-  // Rest of the component remains the same...
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -216,10 +193,16 @@ const Post = ({ post, setCurrentId }) => {
         <Button
           size="small"
           color="primary"
-          disabled={!user?.result || isLiking}
+          disabled={!user?.result || isProcessingLike}
           onClick={handleLike}
+          sx={{ opacity: isProcessingLike ? 0.7 : 1 }}
         >
-          <Likes />
+          {hasLikedPost ? (
+            <ThumbUpAltIcon color="primary" fontSize="small" />
+          ) : (
+            <ThumbUpAltOutlined fontSize="small" />
+          )}
+          &nbsp;{localLikes.length > 0 ? `${localLikes.length} Likes` : 'Like'}
         </Button>
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
