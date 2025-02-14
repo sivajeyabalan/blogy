@@ -23,25 +23,28 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
 
-  // Local state for likes
+  // Local state to store likes to prevent UI flickering
   const [likes, setLikes] = useState(post.likes || []);
+  const [hasLiked, setHasLiked] = useState(post.likes.includes(userId));
 
+  // Update UI when Redux updates
   useEffect(() => {
     setLikes(post.likes || []);
-  }, [post.likes]); // Update when post data changes
+    setHasLiked(post.likes.includes(userId));
+  }, [post.likes]);
 
-  const hasLikedPost = likes.includes(userId);
-
-  const handleLike = () => {
+  const handleLike = async () => {
     dispatch(likePost(post._id));
 
-    if (hasLikedPost) {
-      // Unlike locally
-      setLikes(likes.filter((id) => id !== userId));
+    // Update UI optimistically
+    if (hasLiked) {
+      setLikes((prevLikes) => prevLikes.filter((id) => id !== userId));
     } else {
-      // Like locally
-      setLikes([...likes, userId]);
+      setLikes((prevLikes) => [...prevLikes, userId]);
     }
+
+    // Toggle like state
+    setHasLiked(!hasLiked);
   };
 
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -176,7 +179,7 @@ const Post = ({ post, setCurrentId }) => {
 
       <CardActions sx={{ p: 2, pt: 0 }}>
         <Button size="small" color="primary" disabled={!user?.result} onClick={handleLike}>
-          {hasLikedPost ? <ThumbUpAltIcon color="primary" fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />}
+          {hasLiked ? <ThumbUpAltIcon color="primary" fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />}
           &nbsp;Likes&nbsp;{likes.length}
         </Button>
 
