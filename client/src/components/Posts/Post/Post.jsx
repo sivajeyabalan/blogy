@@ -22,13 +22,32 @@ const Post = ({ post, setCurrentId }) => {
   const user = JSON.parse(localStorage.getItem("profile"));
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
+
+  // Local state for likes
+  const [likes, setLikes] = useState(post.likes || []);
+
+  useEffect(() => {
+    setLikes(post.likes || []);
+  }, [post.likes]); // Update when post data changes
+
+  const hasLikedPost = likes.includes(userId);
+
+  const handleLike = () => {
+    dispatch(likePost(post._id));
+
+    if (hasLikedPost) {
+      // Unlike locally
+      setLikes(likes.filter((id) => id !== userId));
+    } else {
+      // Like locally
+      setLikes([...likes, userId]);
+    }
+  };
+
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
-
+  const handleImageLoad = () => setImageLoaded(true);
   const handleImageError = () => {
     setImageError(true);
     setImageLoaded(true);
@@ -122,12 +141,16 @@ const Post = ({ post, setCurrentId }) => {
           {moment(post.createdAt).fromNow()}
         </Typography>
 
-        <Typography variant="h6" gutterBottom sx={{
-          fontWeight: 600,
-          fontSize: '1.1rem',
-          lineHeight: 1.2,
-          mb: 1
-        }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{
+            fontWeight: 600,
+            fontSize: '1.1rem',
+            lineHeight: 1.2,
+            mb: 1,
+          }}
+        >
           {post.title}
         </Typography>
 
@@ -135,28 +158,26 @@ const Post = ({ post, setCurrentId }) => {
           {post.tags.map((tag) => `#${tag} `)}
         </Typography>
 
-        <Typography variant="body2" sx={{
-          color: 'text.secondary',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          display: '-webkit-box',
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: 'vertical',
-          lineHeight: 1.5,
-        }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            lineHeight: 1.5,
+          }}
+        >
           {post.message}
         </Typography>
       </CardContent>
 
       <CardActions sx={{ p: 2, pt: 0 }}>
-        <Button
-          size="small"
-          color="primary"
-          disabled={!user?.result}
-          onClick={() => dispatch(likePost(post._id))}
-        >
-          {post.likes?.includes(userId) ? <ThumbUpAltIcon fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />}
-          &nbsp;Likes&nbsp;{post.likes?.length || 0}
+        <Button size="small" color="primary" disabled={!user?.result} onClick={handleLike}>
+          {hasLikedPost ? <ThumbUpAltIcon color="primary" fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />}
+          &nbsp;Likes&nbsp;{likes.length}
         </Button>
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
