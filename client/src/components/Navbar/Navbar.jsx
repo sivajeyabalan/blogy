@@ -33,9 +33,35 @@ const Navbar = () => {
         setUser(JSON.parse(localStorage.getItem("profile")));
     }, [location]);
 
-    const handleImageError = (e) => {
-        // Set a default image if the profile image fails to load
-        e.target.src = "https://www.w3schools.com/w3images/avatar2.png";  // Default fallback image
+    const getAvatarContent = (user) => {
+        if (!user?.result) return null;
+
+        // For Google users with valid imageUrl
+        if (user.result.googleId && user.result.imageUrl) {
+            return (
+                <Avatar
+                    className={classes.purple}
+                    alt={user.result.name}
+                    src={user.result.imageUrl}
+                    onError={(e) => {
+                        e.target.src = null; // Clear failed image
+                        e.target.style.backgroundColor = "#3357FF";
+                        e.target.innerHTML = user.result.name.charAt(0);
+                    }}
+                />
+            );
+        }
+
+        // For regular users or if Google image fails
+        return (
+            <Avatar
+                className={classes.purple}
+                alt={user.result.name}
+                style={{ backgroundColor: "#3357FF" }}
+            >
+                {user.result.name.charAt(0)}
+            </Avatar>
+        );
     };
 
     return (
@@ -50,24 +76,30 @@ const Navbar = () => {
             <Toolbar className={classes.toolbar}>
                 {user?.result ? (
                     <div className={classes.profile}>
-                        <Avatar
-                            className={classes.purple}
-                            alt={user?.result.name}
-                            src={user?.result.imageUrl || ""}
-                            onError={handleImageError}  // Add error handler to fallback to default image
-                            style={{ backgroundColor: user?.result.imageUrl ? undefined : "#3357FF" }}
-                        >
-                            {user?.result.name.charAt(0)}
-                        </Avatar>
+                        {getAvatarContent(user)}
                         {isLargeScreen && (
                             <Typography className={classes.userName} variant="h6">
-                                {user?.result.name}
+                                {user.result.name}
                             </Typography>
                         )}
-                        <Button variant="contained" className={classes.logout} color="secondary" onClick={logout}>Logout</Button>
+                        <Button
+                            variant="contained"
+                            className={classes.logout}
+                            color="secondary"
+                            onClick={logout}
+                        >
+                            Logout
+                        </Button>
                     </div>
                 ) : (
-                    <Button component={Link} to="/auth" variant="contained" color="primary">Sign In</Button>
+                    <Button
+                        component={Link}
+                        to="/auth"
+                        variant="contained"
+                        color="primary"
+                    >
+                        Sign In
+                    </Button>
                 )}
             </Toolbar>
         </AppBar>
