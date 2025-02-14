@@ -65,6 +65,7 @@ export const signup = async (req, res) => {
 
 export const googleSignIn = async (req, res) => {
   const { email, name, googleId, picture } = req.body;
+  console.log("controller", picture);
 
   try {
     let existingUser = await User.findOne({ email });

@@ -36,7 +36,7 @@ const Navbar = () => {
     const getAvatarContent = (user) => {
         if (!user?.result) return null;
 
-        // For Google users with valid imageUrl
+        console.log("nvbar", user.result);
         if (user.result.googleId && user.result.imageUrl) {
             return (
                 <Avatar
