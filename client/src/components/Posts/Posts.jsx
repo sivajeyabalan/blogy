@@ -16,7 +16,7 @@ const Posts = ({ setCurrentId }) => {
     ) : (
       <Box className={classes.container} display="flex" flexWrap="wrap" gap={2}>
         {posts?.map((post) => (
-          <Box key={post._id} sx={{ width: { xs: '100%', sm: '48%', md: '50%' } }}>
+          <Box key={post._id} sx={{ width: { xs: '100%', sm: '60%', md: '50%' } }}>
             <Post post={post} setCurrentId={setCurrentId} />
           </Box>
         ))}
