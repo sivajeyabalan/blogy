@@ -47,7 +47,6 @@ const Auth = () => {
         try {
             const token = credentialResponse.credential;
             const decoded = jwtDecode(token);
-            console.log("Google decoded data:", decoded);
 
             // Create user data from Google response
             const googleUser = {
