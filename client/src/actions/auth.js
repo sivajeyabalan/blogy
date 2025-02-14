@@ -23,9 +23,7 @@ export const signup = (formData, navigate) => async (dispatch) => {
 
 export const googleSignIn = (userData, navigate) => async (dispatch) => {
   try {
-    console.log("Action received userData:", userData);
     const { data } = await api.googleSignIn(userData);
-    console.log("Response from backend:", data);
 
     dispatch({ type: AUTH, data });
     navigate("/");

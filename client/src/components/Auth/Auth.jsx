@@ -57,7 +57,6 @@ const Auth = () => {
                 imageUrl: decoded.picture  // Changed from 'picture' to 'imageUrl' to match schema
             };
 
-            console.log("Sending to backend:", googleUser);
             dispatch(googleSignIn(googleUser, navigate));
         } catch (error) {
             console.log("Google Sign In Error:", error);

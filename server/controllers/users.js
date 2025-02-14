@@ -67,8 +67,6 @@ export const googleSignIn = async (req, res) => {
   const { email, name, googleId, imageUrl } = req.body; // Changed from 'picture' to 'imageUrl'
 
   try {
-    console.log("Received Google user data:", req.body);
-
     let existingUser = await User.findOne({ email });
 
     if (!existingUser) {
