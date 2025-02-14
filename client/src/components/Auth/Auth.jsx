@@ -1,130 +1,145 @@
-import React, { useState, useEffect } from "react";
-import { Avatar, Button, Paper, Grid, Typography, Container, Box } from "@mui/material";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-
-import { signin, signup } from "../../actions/auth";
-import { useStyles } from "./Styles";
-import Input from "./Input";
-
-const theme = createTheme();
-const initialState = { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" };
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Lock, Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
-    const classes = useStyles();
-    const [formData, setFormData] = useState(initialState);
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
     const [isSignup, setIsSignup] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
 
-    // When switching between Sign In and Sign Up
     const switchMode = () => {
         setIsSignup((prevIsSignup) => !prevIsSignup);
         setShowPassword(false);
+
+        // Preserve email and password when switching modes
+        const { email, password } = formData;
         setFormData({
             firstName: "",
             lastName: "",
-            email: "", // Clear the email field too
-            password: "",
+            email: email,
+            password: password,
             confirmPassword: "",
         });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (isSignup) {
-            dispatch(signup(formData, navigate, setIsSignup, setFormData));
-        } else {
-            dispatch(signin(formData, navigate, setIsSignup, setFormData));
-        }
+        // Here you would handle the auth logic
+        console.log("Form submitted:", formData);
     };
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleShowPassword = () => setShowPassword((prev) => !prev);
+    const FormInput = ({ name, label, type = "text", half = false }) => (
+        <div className={`${half ? "w-1/2" : "w-full"} px-2 mb-4`}>
+            <div className="relative">
+                <Input
+                    name={name}
+                    type={name === "password" || name === "confirmPassword"
+                        ? (showPassword ? "text" : "password")
+                        : type}
+                    placeholder={label}
+                    value={formData[name]}
+                    onChange={handleChange}
+                    className="w-full"
+                    required
+                />
+                {(name === "password" || name === "confirmPassword") && (
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                        {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-500" />
+                        ) : (
+                            <Eye className="h-4 w-4 text-gray-500" />
+                        )}
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 
     return (
-        <ThemeProvider theme={theme}>
-            <GoogleOAuthProvider clientId="748632032018-jajhqq9kvlmegvn34dj0kvad2go0lq5f.apps.googleusercontent.com">
-                <Container component="main" maxWidth="xs">
-                    <Paper className={classes.paper} elevation={3}>
-                        <Avatar className={classes.avatar}>
-                            <LockOutlinedIcon />
-                        </Avatar>
-                        <Typography component="h1" variant="h5">
-                            {isSignup ? "Sign Up" : "Sign In"}
-                        </Typography>
-                        <form className={classes.form} onSubmit={handleSubmit}>
-                            <Grid container spacing={2}>
-                                {isSignup && (
-                                    <>
-                                        <Input name="firstName" label="First Name" handleChange={handleChange} autoFocus half />
-                                        <Input name="lastName" label="Last Name" handleChange={handleChange} half />
-                                    </>
-                                )}
-                                <Input
-                                    name="email"
-                                    label="Email Address"
-                                    handleChange={handleChange}
-                                    type="email"
-                                    value={formData.email} // Ensure email is controlled
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <Card className="w-full max-w-md">
+                <CardHeader className="text-center">
+                    <div className="mx-auto h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                        <Lock className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold">
+                        {isSignup ? "Sign Up" : "Sign In"}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                        <div className="flex flex-wrap -mx-2">
+                            {isSignup && (
+                                <>
+                                    <FormInput
+                                        name="firstName"
+                                        label="First Name"
+                                        half
+                                    />
+                                    <FormInput
+                                        name="lastName"
+                                        label="Last Name"
+                                        half
+                                    />
+                                </>
+                            )}
+                            <FormInput
+                                name="email"
+                                label="Email Address"
+                                type="email"
+                            />
+                            <FormInput
+                                name="password"
+                                label="Password"
+                            />
+                            {isSignup && (
+                                <FormInput
+                                    name="confirmPassword"
+                                    label="Repeat Password"
                                 />
-                                <Input
-                                    name="password"
-                                    label="Password"
-                                    handleChange={handleChange}
-                                    type={showPassword ? "text" : "password"}
-                                    handleShowPassword={handleShowPassword}
-                                />
-                                {isSignup && <Input name="confirmPassword" label="Repeat Password" handleChange={handleChange} type="password" />}
-                            </Grid>
+                            )}
+                        </div>
 
-                            <Button type="submit" fullWidth variant="contained" className={classes.submit} sx={{ mt: 2 }}>
+                        <div className="space-y-4">
+                            <Button
+                                type="submit"
+                                className="w-full"
+                            >
                                 {isSignup ? "Sign Up" : "Sign In"}
                             </Button>
 
-                            <Box className={classes.googleButtonWrapper} sx={{ mt: 2 }}>
-                                <GoogleLogin
-                                    onSuccess={(credentialResponse) => {
-                                        const token = credentialResponse.credential;
-                                        const decoded = jwtDecode(token);
-                                        const userData = {
-                                            result: {
-                                                email: decoded.email,
-                                                name: decoded.name,
-                                                googleId: decoded.sub,
-                                                imageUrl: decoded.picture,
-                                            },
-                                            token,
-                                        };
-                                        dispatch({ type: "AUTH", data: userData });
-                                        localStorage.setItem("profile", JSON.stringify(userData));
-                                        navigate("/");
-                                    }}
-                                    onError={() => alert("Google Sign In was unsuccessful. Try again later.")}
-                                    theme="filled_blue"
-                                    shape="pill"
-                                    style={{ color: "white", padding: "10px", borderRadius: "5px" }}
-                                    useOneTap
-                                    redirectUri="https://your-redirect-uri.com"
-                                />
-                            </Box>
-
-                            <Button onClick={switchMode} fullWidth sx={{ mt: 2 }}>
-                                {isSignup ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={switchMode}
+                                className="w-full"
+                            >
+                                {isSignup
+                                    ? "Already have an account? Sign In"
+                                    : "Don't have an account? Sign Up"
+                                }
                             </Button>
-                        </form>
-                    </Paper>
-                </Container>
-            </GoogleOAuthProvider>
-        </ThemeProvider>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
     );
 };
 
