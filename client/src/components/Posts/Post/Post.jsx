@@ -23,16 +23,15 @@ const Post = ({ post, setCurrentId }) => {
   const navigate = useNavigate();
   const userId = user?.result?.googleId || user?.result?._id;
 
-  // Local state for likes and loading state
   const [localLikes, setLocalLikes] = useState([]);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
-  // Update local likes when post changes
   useEffect(() => {
     setLocalLikes(post?.likes || []);
-  }, [post._id]); // Only update when post ID changes to prevent infinite loops
+  }, [post._id]);
 
-  // Check if current user has liked the post
   const hasLikedPost = userId ? localLikes.includes(userId) : false;
 
   const handleLike = async () => {
@@ -40,7 +39,6 @@ const Post = ({ post, setCurrentId }) => {
 
     setIsProcessingLike(true);
 
-    // Optimistically update UI
     const newLikes = hasLikedPost
       ? localLikes.filter(id => id !== userId)
       : [...localLikes, userId];
@@ -48,10 +46,8 @@ const Post = ({ post, setCurrentId }) => {
     setLocalLikes(newLikes);
 
     try {
-      // Dispatch like action
       await dispatch(likePost(post._id));
     } catch (error) {
-      // Revert to previous state if action fails
       setLocalLikes(localLikes);
       console.error('Failed to update like:', error);
     } finally {
@@ -59,8 +55,17 @@ const Post = ({ post, setCurrentId }) => {
     }
   };
 
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const handleEdit = () => {
+    setCurrentId(post._id);
+    // Add scroll to form functionality
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      formElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  };
 
   const handleImageLoad = () => setImageLoaded(true);
   const handleImageError = () => {
@@ -207,7 +212,7 @@ const Post = ({ post, setCurrentId }) => {
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
           <>
-            <Button size="small" color="primary" onClick={() => setCurrentId(post._id)}>
+            <Button size="small" color="primary" onClick={handleEdit}>
               <EditIcon fontSize="small" />
             </Button>
             <Button size="small" color="error" onClick={() => dispatch(deletePost(post._id))}>
