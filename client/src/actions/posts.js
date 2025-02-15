@@ -62,22 +62,23 @@ export const createPost = (post, navigate) => async (dispatch) => {
     const { data } = await api.createPost(post);
     navigate(`/posts/${data._id}`);
     dispatch({ type: CREATE, payload: data });
-    dispatch({ type: END_LOADING });
   } catch (error) {
-    console.log(error.message);
+    console.error("Create post error:", error.response?.data || error.message);
+    // Handle error in UI (show notification, etc.)
+  } finally {
+    dispatch({ type: END_LOADING });
   }
 };
 
 export const updatePost = (id, post) => async (dispatch) => {
   try {
     const { data } = await api.updatePost(id, post);
-
     dispatch({ type: UPDATE, payload: data });
   } catch (error) {
-    console.log(error);
+    console.error("Update post error:", error.response?.data || error.message);
+    // Handle error in UI (show notification, etc.)
   }
 };
-
 export const deletePost = (id) => async (dispatch) => {
   try {
     await api.deletePost(id);
