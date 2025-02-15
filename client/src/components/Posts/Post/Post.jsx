@@ -34,7 +34,6 @@ const Post = ({ post, setCurrentId }) => {
 
   // Check if current user has liked the post
   const hasLikedPost = userId ? localLikes.includes(userId) : false;
-  console.log(hasLikedPost, post.title);
 
   const handleLike = async () => {
     if (!userId || isProcessingLike) return;
