@@ -24,6 +24,13 @@ const Navbar = () => {
         window.location.reload();
     };
 
+    const scrollToForm = () => {
+        const formElement = document.querySelector('form');
+        if (formElement) {
+            formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
     useEffect(() => {
         const token = user?.token;
         if (token) {
@@ -43,7 +50,7 @@ const Navbar = () => {
                     alt={user.result.name}
                     src={user.result.imageUrl}
                     onError={(e) => {
-                        e.target.src = null; // Clear failed image
+                        e.target.src = null;
                         e.target.style.backgroundColor = "#3357FF";
                         e.target.innerHTML = user.result.name.charAt(0);
                     }}
@@ -51,7 +58,6 @@ const Navbar = () => {
             );
         }
 
-        // For regular users or if Google image fails
         return (
             <Avatar
                 className={classes.purple}
@@ -77,9 +83,19 @@ const Navbar = () => {
                     <div className={classes.profile}>
                         {getAvatarContent(user)}
                         {isLargeScreen && (
-                            <Typography className={classes.userName} variant="h6">
-                                {user.result.name}
-                            </Typography>
+                            <>
+                                <Typography className={classes.userName} variant="h6">
+                                    {user.result.name}
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={scrollToForm}
+                                    style={{ margin: '0 10px' }}
+                                >
+                                    Create Post
+                                </Button>
+                            </>
                         )}
                         <Button
                             variant="contained"
