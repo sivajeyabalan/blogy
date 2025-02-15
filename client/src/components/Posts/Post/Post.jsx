@@ -222,6 +222,9 @@ const Post = ({ post, setCurrentId }) => {
 
         {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
           <>
+            <Button size="small" color="primary" onClick={handleEdit}>
+              <EditIcon fontSize="small" />
+            </Button>
             <Button
               size="small"
               color="error"
