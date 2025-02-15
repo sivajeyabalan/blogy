@@ -33,6 +33,13 @@ const Post = ({ post, setCurrentId }) => {
   }, [post._id]);
 
   const hasLikedPost = userId ? localLikes.includes(userId) : false;
+
+  const formatTags = (tags) => {
+    if (!tags) return [];
+    if (Array.isArray(tags)) return tags;
+    return tags.split(',').map(tag => tag.trim().toLowerCase());
+  };
+
   const handleDelete = async () => {
     if (isDeleting) return;
     try {
@@ -185,7 +192,9 @@ const Post = ({ post, setCurrentId }) => {
         </Typography>
 
         <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-          {post.tags.map((tag) => `#${tag} `)}
+          {formatTags(post.tags).map((tag, index) => (
+            <span key={index}>#{tag} </span>
+          ))}
         </Typography>
 
         <Typography
