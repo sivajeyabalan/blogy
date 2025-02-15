@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { AppBar, Toolbar, Typography, Avatar, Button } from "@mui/material";
+import { AppBar, Toolbar, Typography, Avatar, Button, IconButton } from "@mui/material";
 import useStyles from "./styles";
 import memoriesLogo from "../../images/memories-Logo.png";
 import memoriesText from "../../images/memories-Text.png";
@@ -82,26 +82,31 @@ const Navbar = () => {
                 {user?.result ? (
                     <div className={classes.profile}>
                         {getAvatarContent(user)}
+
+                        {/* Username only shows on large screens */}
                         {isLargeScreen && (
-                            <>
-                                <Typography className={classes.userName} variant="h6">
-                                    {user.result.name}
-                                </Typography>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={scrollToForm}
-                                    style={{ margin: '0 10px' }}
-                                >
-                                    Create Post
-                                </Button>
-                            </>
+                            <Typography className={classes.userName} variant="h6">
+                                {user.result.name}
+                            </Typography>
                         )}
+
+                        {/* Create Post button shows on all screens */}
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={scrollToForm}
+                            className={classes.createButton}
+                            size={isLargeScreen ? "medium" : "small"}
+                        >
+                            Create
+                        </Button>
+
                         <Button
                             variant="contained"
                             className={classes.logout}
                             color="secondary"
                             onClick={logout}
+                            size={isLargeScreen ? "medium" : "small"}
                         >
                             Logout
                         </Button>
