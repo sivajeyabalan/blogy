@@ -79,13 +79,26 @@ export const updatePost = (id, post) => async (dispatch) => {
     // Handle error in UI (show notification, etc.)
   }
 };
-export const deletePost = (id) => async (dispatch) => {
-  try {
-    await api.deletePost(id);
 
-    dispatch({ type: DELETE, payload: id });
+export const deletePost = (id, navigate) => async (dispatch) => {
+  try {
+    dispatch({ type: START_LOADING });
+
+    const response = await api.deletePost(id);
+
+    if (response.status === 200) {
+      dispatch({ type: DELETE, payload: id });
+
+      // If we're on the post's detail page, redirect to home
+      if (window.location.pathname === `/posts/${id}`) {
+        navigate("/posts");
+      }
+    }
   } catch (error) {
-    console.log(error);
+    console.error("Delete post error:", error);
+    // You might want to dispatch an error action here
+  } finally {
+    dispatch({ type: END_LOADING });
   }
 };
 

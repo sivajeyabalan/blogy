@@ -195,12 +195,50 @@ export const updatePost = async (req, res) => {
 export const deletePost = async (req, res) => {
   const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id))
-    return res.status(404).send("No Post with  that id");
+  try {
+    // Validate MongoDB ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Invalid post ID" });
+    }
 
-  await PostMessage.findByIdAndDelete(id);
+    // Find the post first to check if it exists and verify ownership
+    const post = await PostMessage.findById(id);
 
-  res.json({ message: "Post deleted successfully " });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Verify the user owns this post
+    if (post.creator !== req.userId) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this post" });
+    }
+
+    // If post has an image, you might want to delete it from Cloudinary
+    if (post.selectedFile && post.selectedFile.includes("cloudinary")) {
+      try {
+        const publicId = post.selectedFile.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`MemoriesApp/${publicId}`);
+      } catch (cloudinaryError) {
+        console.error(
+          "Failed to delete image from Cloudinary:",
+          cloudinaryError
+        );
+        // Continue with post deletion even if image deletion fails
+      }
+    }
+
+    // Delete the post
+    await PostMessage.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    console.error("Delete post error:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to delete post", error: error.message });
+  }
 };
 export const likePost = async (req, res) => {
   const { id } = req.params;

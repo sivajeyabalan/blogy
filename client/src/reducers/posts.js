@@ -63,6 +63,7 @@ export default (state = { isLoading: true, posts: [], post: null }, action) => {
       return {
         ...state,
         posts: state.posts.filter((post) => post._id !== action.payload),
+        post: state.post?._id === action.payload ? null : state.post,
       };
     default:
       return state;
