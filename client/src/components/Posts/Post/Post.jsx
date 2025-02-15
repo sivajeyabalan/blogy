@@ -37,7 +37,10 @@ const Post = ({ post, setCurrentId }) => {
   const formatTags = (tags) => {
     if (!tags) return [];
     if (Array.isArray(tags)) return tags;
-    return tags.split(',').map(tag => tag.trim().toLowerCase());
+    if (typeof tags === 'string') {
+      return tags.split(',').map(tag => tag.trim().toLowerCase());
+    }
+    return [];
   };
 
   const handleDelete = async () => {

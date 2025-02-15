@@ -10,7 +10,7 @@ const Form = ({ currentId, setCurrentId }) => {
   const [postData, setPostData] = useState({
     title: "",
     message: "",
-    tags: [],
+    tags: "",
     selectedFile: "",
   });
   const [loading, setLoading] = useState(false); // For image upload status
@@ -25,7 +25,17 @@ const Form = ({ currentId, setCurrentId }) => {
   const user = JSON.parse(localStorage.getItem("profile"));
 
   useEffect(() => {
-    if (post) setPostData(post);
+    if (post) {
+      // Handle tags properly whether they're an array or a string
+      const formattedTags = Array.isArray(post.tags)
+        ? post.tags.join(',')
+        : post.tags;
+
+      setPostData({
+        ...post,
+        tags: formattedTags
+      });
+    }
   }, [post]);
 
   const handleSubmit = async (e) => {
