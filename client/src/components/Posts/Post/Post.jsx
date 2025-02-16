@@ -77,7 +77,6 @@ const Post = ({ post, setCurrentId }) => {
 
   const handleEdit = () => {
     setCurrentId(post._id);
-    // Add scroll to form functionality
     const formElement = document.querySelector('form');
     if (formElement) {
       formElement.scrollIntoView({

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 
-const secret = "test"; // In production, use environment variable
+const secret = "test";
 
 export const signin = async (req, res) => {
   const { email, password } = req.body;
@@ -64,25 +64,23 @@ export const signup = async (req, res) => {
 };
 
 export const googleSignIn = async (req, res) => {
-  const { email, name, googleId, imageUrl } = req.body; // Changed from 'picture' to 'imageUrl'
+  const { email, name, googleId, imageUrl } = req.body;
 
   try {
     let existingUser = await User.findOne({ email });
 
     if (!existingUser) {
-      // Create new user if doesn't exist
       const newUser = await User.create({
         email,
         name,
         googleId,
-        imageUrl, // Store the image URL
+        imageUrl,
         password: `google_${googleId}`,
       });
 
       console.log("Created new user:", newUser);
       existingUser = newUser;
     } else {
-      // Always update the Google user's image URL
       existingUser.googleId = googleId;
       existingUser.imageUrl = imageUrl;
       await existingUser.save();

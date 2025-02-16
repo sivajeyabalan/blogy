@@ -29,7 +29,6 @@ const Home = () => {
 
     const searchPost = () => {
         if (search.trim() || (tags && tags.length > 0)) {
-            // Convert tags to lowercase and remove any extra spaces
             const formattedTags = tags.map((tag) => tag.trim().toLowerCase()).join(",");
             dispatch(getPostsBySearch({ search, tags: formattedTags }));
             navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${formattedTags}`);

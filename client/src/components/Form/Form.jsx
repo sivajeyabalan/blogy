@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { createPost, updatePost } from "../../actions/posts";
 import useStyles from "./styles";
-import axios from "axios"; // Import axios
+import axios from "axios";
 
 const Form = ({ currentId, setCurrentId }) => {
   const [postData, setPostData] = useState({
@@ -13,7 +13,7 @@ const Form = ({ currentId, setCurrentId }) => {
     tags: "",
     selectedFile: "",
   });
-  const [loading, setLoading] = useState(false); // For image upload status
+  const [loading, setLoading] = useState(false);
 
   const post = useSelector((state) =>
     currentId ? state.posts.posts.find((p) => p._id === currentId) : null
@@ -26,7 +26,6 @@ const Form = ({ currentId, setCurrentId }) => {
 
   useEffect(() => {
     if (post) {
-      // Handle tags properly whether they're an array or a string
       const formattedTags = Array.isArray(post.tags)
         ? post.tags.join(',')
         : post.tags;
@@ -48,7 +47,6 @@ const Form = ({ currentId, setCurrentId }) => {
       return;
     }
 
-    // Convert tags to an array only on submit
     const formattedTags = postData.tags
       ? postData.tags.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag !== "")
       : [];
@@ -64,28 +62,28 @@ const Form = ({ currentId, setCurrentId }) => {
 
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0]; // Get the uploaded file
+    const file = e.target.files[0];
 
     if (!file) return;
 
-    setLoading(true); // Start loading
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "MemoriesApp"); // Make sure this is set in Cloudinary
+    formData.append("upload_preset", "MemoriesApp");
 
     try {
       const res = await axios.post("https://api.cloudinary.com/v1_1/de0dsslun/image/upload", formData, {
         headers: {
-          "Content-Type": "multipart/form-data", // Ensure correct content type
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      setPostData({ ...postData, selectedFile: res.data.secure_url }); // Store Cloudinary URL
+      setPostData({ ...postData, selectedFile: res.data.secure_url });
     } catch (error) {
       console.error("Image Upload Error:", error.response ? error.response.data : error.message);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -123,11 +121,11 @@ const Form = ({ currentId, setCurrentId }) => {
           label="Tags (comma separated)"
           fullWidth
           value={postData.tags}
-          onChange={(e) => setPostData({ ...postData, tags: e.target.value })} // Store as string while typing
+          onChange={(e) => setPostData({ ...postData, tags: e.target.value })}
         />
 
         <input type="file" accept="image/*" onChange={handleFileChange} />
-        {loading && <p>Uploading image...</p>} {/* Show loading text while uploading */}
+        {loading && <p>Uploading image...</p>}
         {postData.selectedFile && <img src={postData.selectedFile} alt="Uploaded" style={{ width: "100px", height: "100px", marginTop: "10px" }} />}
         <Button className={`${classes.buttonSubmit}`} variant="contained" color="primary" size="large" type="submit" fullWidth>
           Submit

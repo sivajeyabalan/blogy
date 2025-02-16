@@ -23,7 +23,7 @@ export const getPosts = async (req, res) => {
     const LIMIT = 9;
     const startIndex = (Number(page) - 1) * LIMIT;
     const total = await PostMessage.countDocuments({});
-    const posts_s = await PostMessage.find(); // This should return all posts if there are any
+    const posts_s = await PostMessage.find();
     const posts = await PostMessage.find()
       .sort({ _id: -1 })
       .limit(LIMIT)
@@ -66,7 +66,6 @@ export const createPost = async (req, res) => {
   try {
     let imageUrl = null;
 
-    // Handle image upload to Cloudinary
     if (selectedFile) {
       try {
         const uploadResponse = await cloudinary.uploader.upload(selectedFile, {
@@ -80,7 +79,6 @@ export const createPost = async (req, res) => {
       }
     }
 
-    // Create new post with validated data
     const newPost = new PostMessage({
       title: title.trim(),
       message: message.trim(),
@@ -100,7 +98,6 @@ export const createPost = async (req, res) => {
       comments: [],
     });
 
-    // Save post and handle validation errors
     const savedPost = await newPost.save();
     if (!savedPost) {
       return res.status(400).json({ message: "Failed to save post" });
@@ -120,13 +117,11 @@ export const updatePost = async (req, res) => {
   const { id } = req.params;
   const { title, message, tags, selectedFile, name } = req.body;
 
-  // Validate post ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(404).json({ message: "Invalid post ID" });
   }
 
   try {
-    // Check if post exists and user is authorized
     const existingPost = await PostMessage.findById(id);
     if (!existingPost) {
       return res.status(404).json({ message: "Post not found" });
@@ -140,7 +135,6 @@ export const updatePost = async (req, res) => {
 
     let imageUrl = existingPost.selectedFile;
 
-    // Handle image update if new image is provided
     if (selectedFile && selectedFile !== existingPost.selectedFile) {
       try {
         const uploadResponse = await cloudinary.uploader.upload(selectedFile, {
@@ -154,7 +148,6 @@ export const updatePost = async (req, res) => {
       }
     }
 
-    // Prepare update data with validation
     const updateData = {
       title: title?.trim() || existingPost.title,
       message: message?.trim() || existingPost.message,
@@ -173,7 +166,6 @@ export const updatePost = async (req, res) => {
       lastModified: new Date(),
     };
 
-    // Update post with validation
     const updatedPost = await PostMessage.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
@@ -196,26 +188,22 @@ export const deletePost = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Validate MongoDB ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).json({ message: "Invalid post ID" });
     }
 
-    // Find the post first to check if it exists and verify ownership
     const post = await PostMessage.findById(id);
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // Verify the user owns this post
     if (post.creator !== req.userId) {
       return res
         .status(403)
         .json({ message: "Not authorized to delete this post" });
     }
 
-    // If post has an image, you might want to delete it from Cloudinary
     if (post.selectedFile && post.selectedFile.includes("cloudinary")) {
       try {
         const publicId = post.selectedFile.split("/").pop().split(".")[0];
@@ -225,11 +213,9 @@ export const deletePost = async (req, res) => {
           "Failed to delete image from Cloudinary:",
           cloudinaryError
         );
-        // Continue with post deletion even if image deletion fails
       }
     }
 
-    // Delete the post
     await PostMessage.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Post deleted successfully" });
@@ -253,10 +239,8 @@ export const likePost = async (req, res) => {
   const index = post.likes.findIndex((userId) => userId === String(req.userId));
 
   if (index === -1) {
-    // Like the post
     post.likes.push(String(req.userId));
   } else {
-    // Unlike the post
     post.likes = post.likes.filter((userId) => userId !== String(req.userId));
   }
 

@@ -15,7 +15,7 @@ const Input = ({ name, half, handleChange, autoFocus, type, label, handleShowPas
                 label={label}
                 autoFocus={autoFocus}
                 type={type}
-                value={value || ''} // Add controlled value prop with fallback
+                value={value || ''}
                 InputProps={name === 'password' ? {
                     endAdornment: (
                         <InputAdornment position='end'>

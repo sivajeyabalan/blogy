@@ -10,14 +10,13 @@ const CommentSection = ({ post }) => {
     const [comments, setComments] = useState(post?.comments || []);
     const [comment, setComment] = useState('');
     const user = JSON.parse(localStorage.getItem('profile'));
-    const commentsRef = useRef(null); // Ref for the last comment
+    const commentsRef = useRef(null);
 
-    // Scroll to the last comment when comments update
     useEffect(() => {
         if (commentsRef.current) {
             commentsRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
-    }, [comments]); // Runs when comments update
+    }, [comments]);
 
     const handleClick = async () => {
         const finalComment = `${user.result.name}: ${comment}`;

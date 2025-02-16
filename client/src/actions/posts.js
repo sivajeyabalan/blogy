@@ -47,7 +47,7 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
       data: { data },
     } = await api.fetchPostsBySearch({
       search: searchQuery.search,
-      tags: searchQuery.tags.toLowerCase(), // Convert the tags to lowercase before sending to the backend
+      tags: searchQuery.tags.toLowerCase(),
     });
     dispatch({ type: FETCH_BY_SEARCH, payload: { data } });
     dispatch({ type: END_LOADING });
@@ -64,7 +64,6 @@ export const createPost = (post, navigate) => async (dispatch) => {
     dispatch({ type: CREATE, payload: data });
   } catch (error) {
     console.error("Create post error:", error.response?.data || error.message);
-    // Handle error in UI (show notification, etc.)
   } finally {
     dispatch({ type: END_LOADING });
   }
@@ -76,7 +75,6 @@ export const updatePost = (id, post) => async (dispatch) => {
     dispatch({ type: UPDATE, payload: data });
   } catch (error) {
     console.error("Update post error:", error.response?.data || error.message);
-    // Handle error in UI (show notification, etc.)
   }
 };
 
@@ -89,14 +87,12 @@ export const deletePost = (id, navigate) => async (dispatch) => {
     if (response.status === 200) {
       dispatch({ type: DELETE, payload: id });
 
-      // If we're on the post's detail page, redirect to home
       if (window.location.pathname === `/posts/${id}`) {
         navigate("/posts");
       }
     }
   } catch (error) {
     console.error("Delete post error:", error);
-    // You might want to dispatch an error action here
   } finally {
     dispatch({ type: END_LOADING });
   }

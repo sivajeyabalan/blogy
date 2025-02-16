@@ -83,14 +83,12 @@ const Navbar = () => {
                     <div className={classes.profile}>
                         {getAvatarContent(user)}
 
-                        {/* Username only shows on large screens */}
                         {isLargeScreen && (
                             <Typography className={classes.userName} variant="h6">
                                 {user.result.name}
                             </Typography>
                         )}
 
-                        {/* Create Post button shows on all screens */}
                         <Button
                             variant="contained"
                             color="primary"

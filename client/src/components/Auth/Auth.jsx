@@ -48,12 +48,11 @@ const Auth = () => {
             const token = credentialResponse.credential;
             const decoded = jwtDecode(token);
 
-            // Create user data from Google response
             const googleUser = {
                 email: decoded.email,
                 name: decoded.name,
                 googleId: decoded.sub,
-                imageUrl: decoded.picture  // Changed from 'picture' to 'imageUrl' to match schema
+                imageUrl: decoded.picture
             };
 
             dispatch(googleSignIn(googleUser, navigate));
