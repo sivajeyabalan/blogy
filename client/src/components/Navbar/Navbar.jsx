@@ -72,10 +72,13 @@ const Navbar = () => {
     return (
         <AppBar className={classes.appBar} position="static" color="inherit">
             <div className={classes.brandContainer}>
-                <Link to="/" className={classes.brandContainer}>
-                   <h1 style={{ fontWeight: 'bold', fontSize: '24px' }}>VenueVista</h1>
-                    <img className={classes.image} src={memoriesLogo} alt="icon" height="40px" />
-                </Link>
+                <Link to="/"
+                      className={classes.brandContainer}
+                      style={{ textDecoration: 'none', color: 'black' }}
+                    >
+                      <h1 style={{ fontWeight: 'bold', fontSize: '24px' }}>VenueVista</h1>
+                      <img className={classes.image} src={memoriesLogo} alt="icon" height="40px" />
+                    </Link>
             </div>
 
             <Toolbar className={classes.toolbar}>
