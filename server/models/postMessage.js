@@ -1,19 +1,51 @@
-import mongoose from "mongoose";
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/database.js';
 
-const postSchema = mongoose.Schema({
-  title: String,
-  message: String,
-  name: String,
-  creator: String,
-  tags: [String],
-  selectedFile: String,
-  likes: { type: [String], default: [] },
-  comments: { type: [String], default: [] },
-  createdAt: {
-    type: Date,
-    default: new Date(),
+const PostMessage = sequelize.define('PostMessage', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
   },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  message: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  creator: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+  },
+  tags: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    defaultValue: [],
+  },
+  selectedFile: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  likes: {
+    type: DataTypes.ARRAY(DataTypes.UUID),
+    defaultValue: [],
+  },
+  comments: {
+    type: DataTypes.ARRAY(DataTypes.TEXT),
+    defaultValue: [],
+  },
+}, {
+  tableName: 'posts',
+  timestamps: true,
 });
 
-var PostMessage = mongoose.model("PostMessage", postSchema);
 export default PostMessage;

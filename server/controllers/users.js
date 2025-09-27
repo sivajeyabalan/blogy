@@ -1,14 +1,16 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+import { prisma } from "../config/database.js";
 
-const secret = "test";
+const secret = process.env.JWT_SECRET;
 
 export const signin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
     if (!existingUser)
       return res.status(404).json({ message: "User doesn't exist" });
@@ -22,7 +24,7 @@ export const signin = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
-      { email: existingUser.email, id: existingUser._id },
+      { email: existingUser.email, id: existingUser.id },
       secret,
       { expiresIn: "1h" }
     );
@@ -37,7 +39,9 @@ export const signup = async (req, res) => {
   const { email, password, confirmPassword, firstName, lastName } = req.body;
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
@@ -47,13 +51,15 @@ export const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const result = await User.create({
-      email,
-      password: hashedPassword,
-      name: `${firstName} ${lastName}`,
+    const result = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name: `${firstName} ${lastName}`,
+      },
     });
 
-    const token = jwt.sign({ email: result.email, id: result._id }, secret, {
+    const token = jwt.sign({ email: result.email, id: result.id }, secret, {
       expiresIn: "1h",
     });
 
@@ -67,28 +73,36 @@ export const googleSignIn = async (req, res) => {
   const { email, name, googleId, imageUrl } = req.body;
 
   try {
-    let existingUser = await User.findOne({ email });
+    let existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
     if (!existingUser) {
-      const newUser = await User.create({
-        email,
-        name,
-        googleId,
-        imageUrl,
-        password: `google_${googleId}`,
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          name,
+          googleId,
+          imageUrl,
+          password: `google_${googleId}`,
+        },
       });
 
       console.log("Created new user:", newUser);
       existingUser = newUser;
     } else {
-      existingUser.googleId = googleId;
-      existingUser.imageUrl = imageUrl;
-      await existingUser.save();
+      existingUser = await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          googleId,
+          imageUrl,
+        },
+      });
       console.log("Updated existing user:", existingUser);
     }
 
     const token = jwt.sign(
-      { email: existingUser.email, id: existingUser._id },
+      { email: existingUser.email, id: existingUser.id },
       secret,
       { expiresIn: "1h" }
     );
