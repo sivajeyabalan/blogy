@@ -60,7 +60,7 @@ export const createPost = (post, navigate) => async (dispatch) => {
   try {
     dispatch({ type: START_LOADING });
 
-    // Create FormData if there's a file
+    // Create FormData if there's a file, otherwise send JSON
     let postData = post;
     if (post.selectedFile instanceof File) {
       const formData = new FormData();
@@ -70,6 +70,10 @@ export const createPost = (post, navigate) => async (dispatch) => {
       formData.append("tags", JSON.stringify(post.tags));
       formData.append("name", post.name);
       postData = formData;
+    } else {
+      // Remove the selectedFile if it's not a File object
+      const { selectedFile, ...jsonData } = post;
+      postData = jsonData;
     }
 
     const { data } = await api.createPost(postData);

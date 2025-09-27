@@ -67,23 +67,69 @@ export const getPostsBySearch = async (req, res) => {
 
 export const createPostController = async (req, res) => {
   try {
+    console.log("Creating post with data:", req.body);
+    console.log("File uploaded:", req.file ? "Yes" : "No");
+
+    // Parse tags if they're sent as JSON string
+    let tags = req.body.tags;
+    if (typeof tags === "string") {
+      try {
+        tags = JSON.parse(tags);
+      } catch (e) {
+        // If parsing fails, treat as comma-separated string
+        tags = tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag !== "");
+      }
+    }
+
     const postData = {
       ...req.body,
+      tags: tags,
       creator: req.userId,
       likes: [],
       comments: [],
     };
 
-    // If there's a file uploaded, use the Cloudinary URL
+    // Handle file upload with timeout protection
     if (req.file) {
-      postData.selectedFile = req.file.path;
+      try {
+        if (req.file.path) {
+          postData.selectedFile = req.file.path;
+          console.log("File uploaded to Cloudinary:", req.file.path);
+        } else {
+          console.log("File uploaded but no path available:", req.file);
+          postData.selectedFile = ""; // No image
+        }
+      } catch (uploadError) {
+        console.error("File upload error:", uploadError);
+        postData.selectedFile = ""; // Fallback to no image
+      }
+    } else if (req.body.selectedFile) {
+      // Handle case where selectedFile is passed in body (no file upload)
+      postData.selectedFile = req.body.selectedFile;
+    } else {
+      // No file provided, set empty string
+      postData.selectedFile = "";
     }
 
+    // Map camelCase to snake_case for database
+    if (postData.selectedFile !== undefined) {
+      postData.selected_file = postData.selectedFile;
+      delete postData.selectedFile;
+    }
+
+    console.log("Final post data:", postData);
     const newPost = await createPost(postData);
     res.status(201).json(newPost);
   } catch (error) {
     console.error("Error creating post:", error);
-    res.status(500).json({ message: "Failed to create post" });
+    console.error("Error details:", error.message);
+    res.status(500).json({
+      message: "Failed to create post",
+      error: error.message,
+    });
   }
 };
 
@@ -92,14 +138,16 @@ export const updatePostController = async (req, res) => {
   const { title, message, creator, selectedFile, tags } = req.body;
 
   try {
-    const updatedPost = await updatePost(id, {
+    // Map camelCase to snake_case for database
+    const updateData = {
       title,
       message,
       creator,
-      selectedFile,
+      selected_file: selectedFile, // Map selectedFile to selected_file
       tags,
-    });
+    };
 
+    const updatedPost = await updatePost(id, updateData);
     res.json(updatedPost);
   } catch (error) {
     console.error("Error updating post:", error);

@@ -23,4 +23,13 @@ router.delete("/:id", auth, deletePostController);
 router.patch("/:id/likePost", auth, likePostController);
 router.patch("/:id/commentPost", auth, commentPostController);
 
+// Test route for debugging (remove in production)
+router.post("/test", upload.single("file"), (req, res) => {
+  res.json({
+    message: "Test endpoint working",
+    body: req.body,
+    file: req.file ? "File received" : "No file",
+  });
+});
+
 export default router;

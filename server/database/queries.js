@@ -80,14 +80,28 @@ export async function deleteUser(id) {
 // ===========================================
 
 export async function createPost(postData) {
-  const { title, message, name, creator, tags, selectedFile, likes, comments } =
-    postData;
+  const {
+    title,
+    message,
+    name,
+    creator,
+    tags,
+    selected_file,
+    likes,
+    comments,
+  } = postData;
 
   const [post] = await sql`
     INSERT INTO posts (title, message, name, creator, tags, selected_file, likes, comments)
-    VALUES (${title}, ${message}, ${name}, ${creator}, ${tags}, ${selectedFile}, ${likes}, ${comments})
+    VALUES (${title}, ${message}, ${name}, ${creator}, ${tags}, ${selected_file}, ${likes}, ${comments})
     RETURNING *
   `;
+
+  // Map snake_case to camelCase for client
+  if (post) {
+    post.selectedFile = post.selected_file;
+    delete post.selected_file;
+  }
 
   return post;
 }
@@ -99,6 +113,12 @@ export async function findPostById(id) {
     LEFT JOIN users u ON p.creator = u.id
     WHERE p.id = ${id}
   `;
+
+  // Map snake_case to camelCase for client
+  if (post) {
+    post.selectedFile = post.selected_file;
+    delete post.selected_file;
+  }
 
   return post;
 }
@@ -114,7 +134,14 @@ export async function findPosts(page = 1, limit = 9) {
     LIMIT ${limit} OFFSET ${offset}
   `;
 
-  return posts;
+  // Map snake_case to camelCase for client
+  return posts.map((post) => {
+    if (post) {
+      post.selectedFile = post.selected_file;
+      delete post.selected_file;
+    }
+    return post;
+  });
 }
 
 export async function countPosts() {
@@ -150,7 +177,14 @@ export async function findPostsBySearch(searchQuery, tags) {
     values
   );
 
-  return posts;
+  // Map snake_case to camelCase for client
+  return posts.map((post) => {
+    if (post) {
+      post.selectedFile = post.selected_file;
+      delete post.selected_file;
+    }
+    return post;
+  });
 }
 
 export async function updatePost(id, updateData) {
@@ -159,7 +193,7 @@ export async function updatePost(id, updateData) {
 
   Object.entries(updateData).forEach(([key, value]) => {
     if (value !== undefined) {
-      fields.push(`${key} = $${fields.length + 1}`);
+      fields.push(`${key} = $${values.length + 1}`);
       values.push(value);
     }
   });
@@ -168,12 +202,22 @@ export async function updatePost(id, updateData) {
     throw new Error("No fields to update");
   }
 
-  const [post] = await sql`
+  // Use sql.unsafe with the values array to properly pass parameters
+  const [post] = await sql.unsafe(
+    `
     UPDATE posts 
-    SET ${sql.unsafe(fields.join(", "))}
-    WHERE id = ${id}
+    SET ${fields.join(", ")}
+    WHERE id = $${values.length + 1}
     RETURNING *
-  `;
+  `,
+    [...values, id]
+  );
+
+  // Map snake_case to camelCase for client
+  if (post) {
+    post.selectedFile = post.selected_file;
+    delete post.selected_file;
+  }
 
   return post;
 }

@@ -15,7 +15,7 @@ const buildDatabaseUrl = () => {
     );
   }
 
-  return `postgresql://${user}:${password}@${host}:${port}/${database}?sslmode=require&connection_limit=5&pool_timeout=0`;
+  return `postgresql://${user}:${password}@${host}:${port}/${database}?sslmode=require&connection_limit=5&pool_timeout=20`;
 };
 
 // Use provided DATABASE_URL or build from Render variables

@@ -12,8 +12,25 @@ dotenv.config();
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors({ origin: "*", credentials: true }));
+
+// Set timeout for requests (especially for file uploads)
+app.use((req, res, next) => {
+  req.setTimeout(120000); // 2 minutes
+  res.setTimeout(120000); // 2 minutes
+  next();
+});
+
 app.use("/posts", postRoutes);
 app.use("/user", userRoutes);
+
+// Global error handler (must be after routes)
+app.use((error, req, res, next) => {
+  console.error("Global error handler:", error);
+  res.status(500).json({
+    message: "Internal server error",
+    error: error.message,
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 
