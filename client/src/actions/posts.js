@@ -120,11 +120,17 @@ export const deletePost = (id, navigate) => async (dispatch) => {
 
 export const likePost = (id) => async (dispatch) => {
   try {
+    console.log("🟡 Redux likePost action called with id:", id);
     const { data } = await api.likePost(id);
+    console.log("🟡 API response data:", data);
 
     dispatch({ type: LIKE, payload: data });
+    console.log("🟡 LIKE action dispatched with payload:", data);
   } catch (error) {
-    console.log(error);
+    console.error("🟡 Redux likePost error:", error);
+    console.error("🟡 Error response:", error.response?.data);
+    console.error("🟡 Error status:", error.response?.status);
+    throw error; // Re-throw to allow component to handle it
   }
 };
 

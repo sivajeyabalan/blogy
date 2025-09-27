@@ -23,7 +23,12 @@ export const fetchPostsBySearch = (searchQuery) =>
   );
 
 export const createPost = (newPost) => API.post("/posts", newPost);
-export const likePost = (id) => API.patch(`/posts/${id}/likePost`);
+export const likePost = (id) => {
+  console.log("🟢 API likePost called with id:", id);
+  console.log("🟢 API base URL:", API.defaults.baseURL);
+  console.log("🟢 API headers:", API.defaults.headers);
+  return API.patch(`/posts/${id}/likePost`);
+};
 export const comment = (value, id) =>
   API.patch(`/posts/${id}/commentPost`, { value });
 

@@ -170,15 +170,25 @@ export const deletePostController = async (req, res) => {
 export const likePostController = async (req, res) => {
   const { id } = req.params;
 
+  console.log("🔴 likePostController called", {
+    postId: id,
+    userId: req.userId,
+    headers: req.headers,
+    authHeader: req.headers.authorization,
+  });
+
   if (!req.userId) {
+    console.log("🔴 Unauthorized - no userId");
     return res.status(403).json({ message: "Unauthorized" });
   }
 
   try {
+    console.log("🔴 Calling likePost query with:", { id, userId: req.userId });
     const updatedPost = await likePost(id, req.userId);
+    console.log("🔴 likePost query result:", updatedPost);
     res.json(updatedPost);
   } catch (error) {
-    console.error("Error liking post:", error);
+    console.error("🔴 Error liking post:", error);
     res.status(500).json({ message: "Failed to like post" });
   }
 };

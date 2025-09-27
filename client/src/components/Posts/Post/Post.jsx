@@ -21,7 +21,7 @@ const Post = ({ post, setCurrentId }) => {
   const dispatch = useDispatch();
   const user = JSON.parse(localStorage.getItem("profile"));
   const navigate = useNavigate();
-  const userId = user?.result?.googleId || user?.result?._id;
+  const userId = user?.result?.googleId || user?.result?.id;
   const [isDeleting, setIsDeleting] = useState(false);
   const [localLikes, setLocalLikes] = useState([]);
   const [isProcessingLike, setIsProcessingLike] = useState(false);
@@ -55,21 +55,47 @@ const Post = ({ post, setCurrentId }) => {
     }
   };
   const handleLike = async () => {
-    if (!userId || isProcessingLike) return;
+    console.log("🔵 handleLike called", {
+      userId,
+      isProcessingLike,
+      postId: post.id || post._id,
+      currentLikes: localLikes,
+      hasLikedPost,
+      user: user,
+      profile: localStorage.getItem("profile"),
+    });
+
+    if (!userId || isProcessingLike) {
+      console.log("❌ Like blocked:", {
+        userId: !!userId,
+        isProcessingLike,
+        userExists: !!user,
+        profileExists: !!localStorage.getItem("profile"),
+      });
+      return;
+    }
 
     setIsProcessingLike(true);
+
+    // Store the current state for potential rollback
+    const previousLikes = [...localLikes];
 
     const newLikes = hasLikedPost
       ? localLikes.filter((id) => id !== userId)
       : [...localLikes, userId];
 
+    console.log("🔄 Updating local likes:", { previousLikes, newLikes });
+
     setLocalLikes(newLikes);
 
     try {
-      await dispatch(likePost(post.id || post._id));
+      console.log("📤 Dispatching likePost action...");
+      const result = await dispatch(likePost(post.id || post._id));
+      console.log("✅ Like action completed:", result);
     } catch (error) {
-      setLocalLikes(localLikes);
-      console.error("Failed to update like:", error);
+      // Revert to previous state on error
+      console.error("❌ Failed to update like:", error);
+      setLocalLikes(previousLikes);
     } finally {
       setIsProcessingLike(false);
     }
@@ -235,7 +261,7 @@ const Post = ({ post, setCurrentId }) => {
         </Button>
 
         {(user?.result?.googleId === post?.creator ||
-          user?.result?._id === post?.creator) && (
+          user?.result?.id === post?.creator) && (
           <>
             <Button size="small" color="primary" onClick={handleEdit}>
               <EditIcon fontSize="small" />

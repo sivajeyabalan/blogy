@@ -34,14 +34,41 @@ export default (state = { isLoading: true, posts: [], post: null }, action) => {
         post: action.payload,
       };
     case LIKE:
-      return {
+      console.log("🟠 LIKE reducer called", {
+        payload: action.payload,
+        currentPosts: state.posts.length,
+        postId: action.payload?.id || action.payload?._id,
+        existingPostIds: state.posts.map((p) => p.id || p._id),
+      });
+
+      // Check if post already exists
+      const existingPostIndex = state.posts.findIndex((post) => {
+        const postId = post.id || post._id;
+        const payloadId = action.payload.id || action.payload._id;
+        return postId === payloadId;
+      });
+
+      console.log("🟠 Post found at index:", existingPostIndex);
+
+      const updatedState = {
         ...state,
-        posts: state.posts.map((post) =>
-          post._id === action.payload._id || post.id === action.payload.id
-            ? action.payload
-            : post
-        ),
+        posts: state.posts.map((post) => {
+          const postId = post.id || post._id;
+          const payloadId = action.payload.id || action.payload._id;
+          return postId === payloadId ? action.payload : post;
+        }),
       };
+
+      console.log("🟠 LIKE reducer result:", {
+        updatedPosts: updatedState.posts.length,
+        updatedPost: updatedState.posts.find((p) => {
+          const postId = p.id || p._id;
+          const payloadId = action.payload.id || action.payload._id;
+          return postId === payloadId;
+        }),
+        allPostIds: updatedState.posts.map((p) => p.id || p._id),
+      });
+      return updatedState;
     case COMMENT:
       return {
         ...state,

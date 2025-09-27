@@ -228,21 +228,28 @@ export async function deletePost(id) {
 }
 
 export async function likePost(id, userId) {
+  console.log("🟣 likePost query called", { id, userId });
+
   // Get current likes
   const [post] = await sql`SELECT likes FROM posts WHERE id = ${id}`;
+  console.log("🟣 Current post data:", post);
 
   if (!post) {
+    console.log("🟣 Post not found");
     throw new Error("Post not found");
   }
 
   const currentLikes = post.likes || [];
   const isLiked = currentLikes.includes(userId);
+  console.log("🟣 Current likes:", { currentLikes, isLiked });
 
   let newLikes;
   if (isLiked) {
     newLikes = currentLikes.filter((like) => like !== userId);
+    console.log("🟣 Removing like, new likes:", newLikes);
   } else {
     newLikes = [...currentLikes, userId];
+    console.log("🟣 Adding like, new likes:", newLikes);
   }
 
   const [updatedPost] = await sql`
@@ -251,6 +258,13 @@ export async function likePost(id, userId) {
     WHERE id = ${id}
     RETURNING *
   `;
+  console.log("🟣 Updated post:", updatedPost);
+
+  // Map snake_case to camelCase for client
+  if (updatedPost) {
+    updatedPost.selectedFile = updatedPost.selected_file;
+    delete updatedPost.selected_file;
+  }
 
   return updatedPost;
 }
