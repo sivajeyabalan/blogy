@@ -2,7 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import { prisma } from "./config/database.js";
+import { testConnection } from "./database/simple-db.js";
 import postRoutes from "./routes/posts.js";
 import userRoutes from "./routes/users.js";
 
@@ -14,29 +14,61 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors({ origin: "*", credentials: true }));
 app.use("/posts", postRoutes);
 app.use("/user", userRoutes);
+
 const PORT = process.env.PORT || 5000;
+
+// Health check endpoint
+app.get("/health", async (req, res) => {
+  try {
+    const isConnected = await testConnection();
+    const statusCode = isConnected ? 200 : 503;
+    res.status(statusCode).json({
+      status: isConnected ? "healthy" : "unhealthy",
+      database: isConnected ? "connected" : "disconnected",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: "unhealthy",
+      error: error.message,
+      database: "disconnected",
+    });
+  }
+});
 
 // Test database connection and start server
 const startServer = async () => {
   try {
-    await prisma.$connect();
-    console.log("Database connection has been established successfully.");
+    // Test database connection
+    const isConnected = await testConnection();
 
-    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
+    if (!isConnected) {
+      console.error("❌ Database connection failed");
+      process.exit(1);
+    }
+
+    console.log("✅ Database connected successfully");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port: ${PORT}`);
+      console.log(
+        `📊 Health check available at: http://localhost:${PORT}/health`
+      );
+      console.log(`🔗 Environment: ${process.env.NODE_ENV || "development"}`);
+    });
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("❌ Unable to start server:", error);
+    process.exit(1);
   }
 };
 
 // Graceful shutdown
-process.on("SIGINT", async () => {
-  await prisma.$disconnect();
+const gracefulShutdown = async (signal) => {
+  console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
   process.exit(0);
-});
+};
 
-process.on("SIGTERM", async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
 startServer();

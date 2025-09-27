@@ -5,7 +5,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "migrate": "node scripts/simple-migrate.js",
+    "test:simple": "node scripts/test-simple.js",
+    "test:db": "node scripts/test-connection.js",
+    "test:optimized": "node scripts/test-optimized-connection.js",
+    "test:render": "node scripts/test-render-connection.js",
+    "test:render-vars": "node scripts/test-render-variables.js",
+    "db:seed": "node scripts/simple-seed.js"
   },
   "keywords": [],
   "author": "",
@@ -15,16 +23,12 @@
     "body-parser": "^1.20.3",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "@prisma/client": "^5.22.0",
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
-    "nodemon": "^3.1.9"
-  },
-  "devDependencies": {
-    "@testing-library/jest-dom": "^6.6.3",
-    "prisma": "^5.22.0"
+    "nodemon": "^3.1.9",
+    "postgres": "^3.4.7"
   }
 }

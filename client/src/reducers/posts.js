@@ -37,14 +37,19 @@ export default (state = { isLoading: true, posts: [], post: null }, action) => {
       return {
         ...state,
         posts: state.posts.map((post) =>
-          post._id === action.payload._id ? action.payload : post
+          post._id === action.payload._id || post.id === action.payload.id
+            ? action.payload
+            : post
         ),
       };
     case COMMENT:
       return {
         ...state,
         posts: state.posts.map((post) => {
-          if (post._id === action.payload._id) {
+          if (
+            post._id === action.payload._id ||
+            post.id === action.payload.id
+          ) {
             return action.payload;
           }
           return post;
@@ -56,14 +61,22 @@ export default (state = { isLoading: true, posts: [], post: null }, action) => {
       return {
         ...state,
         posts: state.posts.map((post) =>
-          post._id === action.payload._id ? action.payload : post
+          post._id === action.payload._id || post.id === action.payload.id
+            ? action.payload
+            : post
         ),
       };
     case DELETE:
       return {
         ...state,
-        posts: state.posts.filter((post) => post._id !== action.payload),
-        post: state.post?._id === action.payload ? null : state.post,
+        posts: state.posts.filter(
+          (post) => post._id !== action.payload && post.id !== action.payload
+        ),
+        post:
+          state.post?._id === action.payload ||
+          state.post?.id === action.payload
+            ? null
+            : state.post,
       };
     default:
       return state;

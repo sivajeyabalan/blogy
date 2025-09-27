@@ -59,8 +59,24 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
 export const createPost = (post, navigate) => async (dispatch) => {
   try {
     dispatch({ type: START_LOADING });
-    const { data } = await api.createPost(post);
-    navigate(`/posts/${data._id}`);
+
+    // Create FormData if there's a file
+    let postData = post;
+    if (post.selectedFile instanceof File) {
+      const formData = new FormData();
+      formData.append("file", post.selectedFile);
+      formData.append("title", post.title);
+      formData.append("message", post.message);
+      formData.append("tags", JSON.stringify(post.tags));
+      formData.append("name", post.name);
+      postData = formData;
+    }
+
+    const { data } = await api.createPost(postData);
+    const postId = data.id || data._id;
+    if (postId) {
+      navigate(`/posts/${postId}`);
+    }
     dispatch({ type: CREATE, payload: data });
   } catch (error) {
     console.error("Create post error:", error.response?.data || error.message);
@@ -88,7 +104,7 @@ export const deletePost = (id, navigate) => async (dispatch) => {
       dispatch({ type: DELETE, payload: id });
 
       if (window.location.pathname === `/posts/${id}`) {
-        navigate("/posts");
+        navigate("/");
       }
     }
   } catch (error) {
@@ -113,8 +129,9 @@ export const commentPost = (value, id) => async (dispatch) => {
     const { data } = await api.comment(value, id);
 
     dispatch({ type: COMMENT, payload: data });
-    return data.comments;
+    return data.comments || data.comment || [];
   } catch (error) {
-    console.log(error);
+    console.error("Comment post error:", error.response?.data || error.message);
+    throw error; // Re-throw to allow component to handle it
   }
 };

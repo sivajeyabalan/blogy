@@ -27,12 +27,12 @@ const Form = ({ currentId, setCurrentId }) => {
   useEffect(() => {
     if (post) {
       const formattedTags = Array.isArray(post.tags)
-        ? post.tags.join(',')
+        ? post.tags.join(",")
         : post.tags;
 
       setPostData({
         ...post,
-        tags: formattedTags
+        tags: formattedTags,
       });
     }
   }, [post]);
@@ -48,46 +48,33 @@ const Form = ({ currentId, setCurrentId }) => {
     }
 
     const formattedTags = postData.tags
-      ? postData.tags.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag !== "")
+      ? postData.tags
+          .split(",")
+          .map((tag) => tag.trim().toLowerCase())
+          .filter((tag) => tag !== "")
       : [];
 
+    const postPayload = {
+      ...postData,
+      tags: formattedTags,
+      title: trimmedTitle,
+      name: user?.result?.name,
+    };
+
     if (currentId === 0) {
-      dispatch(createPost({ ...postData, tags: formattedTags, title: trimmedTitle, name: user?.result?.name }, navigate));
+      dispatch(createPost(postPayload, navigate));
     } else {
-      dispatch(updatePost(currentId, { ...postData, tags: formattedTags, title: trimmedTitle, name: user?.result?.name }));
+      dispatch(updatePost(currentId, postPayload));
     }
     clear();
   };
 
-
-
-  const handleFileChange = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-
-    if (!file) return;
-
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "MemoriesApp");
-
-    try {
-      const res = await axios.post("https://api.cloudinary.com/v1_1/de0dsslun/image/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      setPostData({ ...postData, selectedFile: res.data.secure_url });
-    } catch (error) {
-      console.error("Image Upload Error:", error.response ? error.response.data : error.message);
-    } finally {
-      setLoading(false);
+    if (file) {
+      setPostData({ ...postData, selectedFile: file });
     }
   };
-
-
 
   if (!user?.result?.name) {
     return (
@@ -111,10 +98,35 @@ const Form = ({ currentId, setCurrentId }) => {
 
   return (
     <Paper className={classes.paper} elevation={6}>
-      <form autoComplete="off" noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit}>
-        <Typography variant="h6">{currentId ? `Editing "${post.title}"` : "Creating a Memory"}</Typography>
-        <TextField name="title" variant="outlined" label="Title" fullWidth value={postData.title} onChange={(e) => setPostData({ ...postData, title: e.target.value })} />
-        <TextField name="message" variant="outlined" label="Message" fullWidth multiline rows={4} value={postData.message} onChange={(e) => setPostData({ ...postData, message: e.target.value })} />
+      <form
+        autoComplete="off"
+        noValidate
+        className={`${classes.root} ${classes.form}`}
+        onSubmit={handleSubmit}
+      >
+        <Typography variant="h6">
+          {currentId ? `Editing "${post.title}"` : "Creating a Memory"}
+        </Typography>
+        <TextField
+          name="title"
+          variant="outlined"
+          label="Title"
+          fullWidth
+          value={postData.title}
+          onChange={(e) => setPostData({ ...postData, title: e.target.value })}
+        />
+        <TextField
+          name="message"
+          variant="outlined"
+          label="Message"
+          fullWidth
+          multiline
+          rows={4}
+          value={postData.message}
+          onChange={(e) =>
+            setPostData({ ...postData, message: e.target.value })
+          }
+        />
         <TextField
           name="tags"
           variant="outlined"
@@ -126,14 +138,33 @@ const Form = ({ currentId, setCurrentId }) => {
 
         <input type="file" accept="image/*" onChange={handleFileChange} />
         {loading && <p>Uploading image...</p>}
-        {postData.selectedFile && <img src={postData.selectedFile} alt="Uploaded" style={{ width: "100px", height: "100px", marginTop: "10px" }} />}
-        <Button className={`${classes.buttonSubmit}`} variant="contained" color="primary" size="large" type="submit" fullWidth>
+        {postData.selectedFile && (
+          <img
+            src={postData.selectedFile}
+            alt="Uploaded"
+            style={{ width: "100px", height: "100px", marginTop: "10px" }}
+          />
+        )}
+        <Button
+          className={`${classes.buttonSubmit}`}
+          variant="contained"
+          color="primary"
+          size="large"
+          type="submit"
+          fullWidth
+        >
           Submit
         </Button>
-        <Button className={`${classes.buttonClear}`} variant="contained" color="secondary" size="small" onClick={clear} fullWidth>
+        <Button
+          className={`${classes.buttonClear}`}
+          variant="contained"
+          color="secondary"
+          size="small"
+          onClick={clear}
+          fullWidth
+        >
           Clear
         </Button>
-
       </form>
     </Paper>
   );

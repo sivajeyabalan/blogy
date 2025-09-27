@@ -8,20 +8,21 @@ const Posts = ({ setCurrentId }) => {
   const { posts, isLoading } = useSelector((state) => state.posts);
   const classes = useStyles();
 
-  if (!posts?.length && !isLoading) return 'No posts';
+  if (!posts?.length && !isLoading) return "No posts";
 
-  return (
-    isLoading ? (
-      <CircularProgress />
-    ) : (
-      <Box className={classes.container} display="flex" flexWrap="wrap" gap={2}>
-        {posts?.map((post) => (
-          <Box key={post._id} sx={{ width: { xs: '100%', sm: '48%', md: '30%' } }}>
-            <Post post={post} setCurrentId={setCurrentId} />
-          </Box>
-        ))}
-      </Box>
-    )
+  return isLoading ? (
+    <CircularProgress />
+  ) : (
+    <Box className={classes.container} display="flex" flexWrap="wrap" gap={2}>
+      {posts?.map((post) => (
+        <Box
+          key={post.id || post._id}
+          sx={{ width: { xs: "100%", sm: "48%", md: "30%" } }}
+        >
+          <Post post={post} setCurrentId={setCurrentId} />
+        </Box>
+      ))}
+    </Box>
   );
 };
 

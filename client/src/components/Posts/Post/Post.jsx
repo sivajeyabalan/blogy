@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardActions,
@@ -7,15 +7,15 @@ import {
   Typography,
   Box,
   Skeleton,
-} from '@mui/material';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import ThumbUpAltOutlined from '@mui/icons-material/ThumbUpAltOutlined';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import moment from 'moment';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { deletePost, likePost } from '../../../actions/posts';
+} from "@mui/material";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpAltOutlined from "@mui/icons-material/ThumbUpAltOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import moment from "moment";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { deletePost, likePost } from "../../../actions/posts";
 
 const Post = ({ post, setCurrentId }) => {
   const dispatch = useDispatch();
@@ -30,15 +30,15 @@ const Post = ({ post, setCurrentId }) => {
 
   useEffect(() => {
     setLocalLikes(post?.likes || []);
-  }, [post._id]);
+  }, [post.id || post._id]);
 
   const hasLikedPost = userId ? localLikes.includes(userId) : false;
 
   const formatTags = (tags) => {
     if (!tags) return [];
     if (Array.isArray(tags)) return tags;
-    if (typeof tags === 'string') {
-      return tags.split(',').map(tag => tag.trim().toLowerCase());
+    if (typeof tags === "string") {
+      return tags.split(",").map((tag) => tag.trim().toLowerCase());
     }
     return [];
   };
@@ -47,9 +47,9 @@ const Post = ({ post, setCurrentId }) => {
     if (isDeleting) return;
     try {
       setIsDeleting(true);
-      await dispatch(deletePost(post._id, navigate));
+      await dispatch(deletePost(post.id || post._id, navigate));
     } catch (error) {
-      console.error('Failed to delete post:', error);
+      console.error("Failed to delete post:", error);
     } finally {
       setIsDeleting(false);
     }
@@ -60,28 +60,28 @@ const Post = ({ post, setCurrentId }) => {
     setIsProcessingLike(true);
 
     const newLikes = hasLikedPost
-      ? localLikes.filter(id => id !== userId)
+      ? localLikes.filter((id) => id !== userId)
       : [...localLikes, userId];
 
     setLocalLikes(newLikes);
 
     try {
-      await dispatch(likePost(post._id));
+      await dispatch(likePost(post.id || post._id));
     } catch (error) {
       setLocalLikes(localLikes);
-      console.error('Failed to update like:', error);
+      console.error("Failed to update like:", error);
     } finally {
       setIsProcessingLike(false);
     }
   };
 
   const handleEdit = () => {
-    setCurrentId(post._id);
-    const formElement = document.querySelector('form');
+    setCurrentId(post.id || post._id);
+    const formElement = document.querySelector("form");
     if (formElement) {
       formElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
+        behavior: "smooth",
+        block: "center",
       });
     }
   };
@@ -97,15 +97,15 @@ const Post = ({ post, setCurrentId }) => {
       return (
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: 'rgba(0, 0, 0, 0.05)',
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "rgba(0, 0, 0, 0.05)",
           }}
         >
           <Typography variant="body2" color="textSecondary">
@@ -122,7 +122,7 @@ const Post = ({ post, setCurrentId }) => {
             variant="rectangular"
             width="100%"
             height="100%"
-            sx={{ position: 'absolute', top: 0, left: 0 }}
+            sx={{ position: "absolute", top: 0, left: 0 }}
           />
         )}
         <img
@@ -131,13 +131,13 @@ const Post = ({ post, setCurrentId }) => {
           onLoad={handleImageLoad}
           onError={handleImageError}
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: imageLoaded ? 'block' : 'none',
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: imageLoaded ? "block" : "none",
           }}
         />
       </>
@@ -147,29 +147,29 @@ const Post = ({ post, setCurrentId }) => {
   return (
     <Card
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        position: 'relative',
-        borderRadius: '15px',
-        bgcolor: 'background.paper',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-5px)',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        position: "relative",
+        borderRadius: "15px",
+        bgcolor: "background.paper",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-5px)",
+          boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
         },
       }}
       elevation={2}
     >
       <Box
-        onClick={() => navigate(`/posts/${post._id}`)}
+        onClick={() => navigate(`/posts/${post.id || post._id}`)}
         sx={{
-          cursor: 'pointer',
-          position: 'relative',
-          paddingTop: '56.25%',
-          backgroundColor: 'rgba(0, 0, 0, 0.04)',
-          borderRadius: '15px 15px 0 0',
-          overflow: 'hidden',
+          cursor: "pointer",
+          position: "relative",
+          paddingTop: "56.25%",
+          backgroundColor: "rgba(0, 0, 0, 0.04)",
+          borderRadius: "15px 15px 0 0",
+          overflow: "hidden",
         }}
       >
         {renderImage()}
@@ -177,7 +177,7 @@ const Post = ({ post, setCurrentId }) => {
 
       <CardContent sx={{ flexGrow: 1, p: 2 }}>
         <Typography variant="body2" color="textSecondary" gutterBottom>
-          {moment(post.createdAt).fromNow()}
+          {moment(post.created_at || post.createdAt).fromNow()}
         </Typography>
 
         <Typography
@@ -185,7 +185,7 @@ const Post = ({ post, setCurrentId }) => {
           gutterBottom
           sx={{
             fontWeight: 600,
-            fontSize: '1.1rem',
+            fontSize: "1.1rem",
             lineHeight: 1.2,
             mb: 1,
           }}
@@ -202,12 +202,12 @@ const Post = ({ post, setCurrentId }) => {
         <Typography
           variant="body2"
           sx={{
-            color: 'text.secondary',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
+            color: "text.secondary",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
             WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
+            WebkitBoxOrient: "vertical",
             lineHeight: 1.5,
           }}
         >
@@ -228,10 +228,11 @@ const Post = ({ post, setCurrentId }) => {
           ) : (
             <ThumbUpAltOutlined fontSize="small" />
           )}
-          &nbsp;{localLikes.length > 0 ? `${localLikes.length} Likes` : 'Like'}
+          &nbsp;{localLikes.length > 0 ? `${localLikes.length} Likes` : "Like"}
         </Button>
 
-        {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
+        {(user?.result?.googleId === post?.creator ||
+          user?.result?._id === post?.creator) && (
           <>
             <Button size="small" color="primary" onClick={handleEdit}>
               <EditIcon fontSize="small" />

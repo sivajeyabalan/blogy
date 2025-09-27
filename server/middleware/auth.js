@@ -10,6 +10,11 @@ const auth = async (req, res, next) => {
       return res.status(403).json({ message: "No token provided" });
     }
 
+    if (!secret) {
+      console.error("JWT_SECRET is not defined");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+
     const isCustomAuth = token.length < 500;
 
     let decodedData;
@@ -22,8 +27,13 @@ const auth = async (req, res, next) => {
       req.userId = decodedData?.sub;
     }
 
+    if (!req.userId) {
+      return res.status(403).json({ message: "Invalid token" });
+    }
+
     next();
   } catch (error) {
+    console.error("Auth error:", error);
     return res.status(403).json({ message: "Unauthorized" });
   }
 };
