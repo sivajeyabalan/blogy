@@ -154,7 +154,7 @@ const Post = ({ post, setCurrentId }) => {
         <img
           src={
             post.selectedFile ||
-            "https://user-images.githubusercontent.com/194400/49531010-48dad180-f8b1-11e8-8d89-1e61320e1d82.png"
+            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjVmNWY1Ii8+CjxyZWN0IHg9IjE1MCIgeT0iMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U5ZTllOSIvPgo8Y2lyY2xlIGN4PSIxNzUiIGN5PSIxMzAiIHI9IjEwIiBmaWxsPSIjYzRjNGM0Ii8+CjxwYXRoIGQ9Ik0xNjAgMTUwTDE3MCAxNDBMMTkwIDE2MEwyMDAgMTUwIiBzdHJva2U9IiNjNGM0YzQiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgo8dGV4dCB4PSIyMDAiIHk9IjI1MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5OTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+"
           }
           alt={post.title}
           onLoad={handleImageLoad}
