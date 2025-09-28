@@ -87,11 +87,11 @@ export default (state = { isLoading: true, posts: [], post: null }, action) => {
     case UPDATE:
       return {
         ...state,
-        posts: state.posts.map((post) =>
-          post._id === action.payload._id || post.id === action.payload.id
-            ? action.payload
-            : post
-        ),
+        posts: state.posts.map((post) => {
+          const postId = post.id || post._id;
+          const payloadId = action.payload.id || action.payload._id;
+          return postId === payloadId ? action.payload : post;
+        }),
       };
     case DELETE:
       return {

@@ -56,7 +56,12 @@ export const getPostsBySearch = async (req, res) => {
 
   try {
     const tagArray = tags ? tags.split(",").map((tag) => tag.trim()) : null;
-    const posts = await findPostsBySearch(searchQuery, tagArray);
+
+    // If searchQuery is "none", treat it as null/empty for title search
+    const actualSearchQuery =
+      searchQuery === "none" || searchQuery === "" ? null : searchQuery;
+
+    const posts = await findPostsBySearch(actualSearchQuery, tagArray);
 
     res.json({ data: posts });
   } catch (error) {
@@ -136,6 +141,8 @@ export const createPostController = async (req, res) => {
 export const updatePostController = async (req, res) => {
   const { id } = req.params;
   const { title, message, creator, selectedFile, tags } = req.body;
+
+  console.log("🔍 updatePostController - id:", id, "type:", typeof id);
 
   try {
     // Map camelCase to snake_case for database

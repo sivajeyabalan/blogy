@@ -47,7 +47,7 @@ export const getPostsBySearch = (searchQuery) => async (dispatch) => {
       data: { data },
     } = await api.fetchPostsBySearch({
       search: searchQuery.search,
-      tags: searchQuery.tags.toLowerCase(),
+      tags: searchQuery.tags,
     });
     dispatch({ type: FETCH_BY_SEARCH, payload: { data } });
     dispatch({ type: END_LOADING });
@@ -91,6 +91,7 @@ export const createPost = (post, navigate) => async (dispatch) => {
 
 export const updatePost = (id, post) => async (dispatch) => {
   try {
+    console.log("🔍 updatePost action - id:", id, "type:", typeof id);
     const { data } = await api.updatePost(id, post);
     dispatch({ type: UPDATE, payload: data });
   } catch (error) {

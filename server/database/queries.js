@@ -49,9 +49,17 @@ export async function updateUser(id, updateData) {
   const fields = [];
   const values = [];
 
+  // Map camelCase to snake_case for database columns
+  const fieldMapping = {
+    googleId: "google_id",
+    imageUrl: "image_url",
+    // Add other mappings as needed
+  };
+
   Object.entries(updateData).forEach(([key, value]) => {
     if (value !== undefined) {
-      fields.push(`${key} = $${fields.length + 1}`);
+      const dbColumn = fieldMapping[key] || key;
+      fields.push(`${dbColumn} = $${values.length + 1}`);
       values.push(value);
     }
   });
@@ -60,12 +68,18 @@ export async function updateUser(id, updateData) {
     throw new Error("No fields to update");
   }
 
-  const [user] = await sql`
+  // Add the id parameter at the end
+  values.push(id);
+
+  const [user] = await sql.unsafe(
+    `
     UPDATE users 
-    SET ${sql.unsafe(fields.join(", "))}
-    WHERE id = ${id}
+    SET ${fields.join(", ")}
+    WHERE id = $${values.length}
     RETURNING *
-  `;
+  `,
+    values
+  );
 
   return user;
 }
@@ -161,7 +175,8 @@ export async function findPostsBySearch(searchQuery, tags) {
   }
 
   if (tags && tags.length > 0) {
-    whereClause += ` AND p.tags && $${values.length + 1}`;
+    // Convert tags array to PostgreSQL array format and use overlap operator
+    whereClause += ` AND p.tags && $${values.length + 1}::text[]`;
     values.push(tags);
   }
 
@@ -188,6 +203,13 @@ export async function findPostsBySearch(searchQuery, tags) {
 }
 
 export async function updatePost(id, updateData) {
+  // Validate ID
+  if (!id || id === "null" || id === "undefined") {
+    throw new Error("Invalid post ID provided for update");
+  }
+
+  console.log("🔍 updatePost database - id:", id, "type:", typeof id);
+
   const fields = [];
   const values = [];
 

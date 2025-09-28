@@ -16,7 +16,9 @@ const Form = ({ currentId, setCurrentId }) => {
   const [loading, setLoading] = useState(false);
 
   const post = useSelector((state) =>
-    currentId ? state.posts.posts.find((p) => p._id === currentId) : null
+    currentId
+      ? state.posts.posts.find((p) => (p.id || p._id) === currentId)
+      : null
   );
 
   const navigate = useNavigate();
@@ -54,16 +56,45 @@ const Form = ({ currentId, setCurrentId }) => {
           .filter((tag) => tag !== "")
       : [];
 
+    // Remove ID and other fields that shouldn't be sent to server
+    const {
+      id,
+      _id,
+      creator,
+      likes,
+      comments,
+      created_at,
+      updated_at,
+      user_name,
+      user_image_url,
+      ...cleanPostData
+    } = postData;
+
     const postPayload = {
-      ...postData,
+      ...cleanPostData,
       tags: formattedTags,
       title: trimmedTitle,
       name: user?.result?.name,
     };
 
-    if (currentId === 0) {
+    console.log(
+      "🔍 Form handleSubmit - currentId:",
+      currentId,
+      "type:",
+      typeof currentId
+    );
+
+    if (
+      currentId === 0 ||
+      currentId === null ||
+      currentId === undefined ||
+      currentId === "null" ||
+      currentId === "undefined"
+    ) {
+      console.log("🔍 Creating new post");
       dispatch(createPost(postPayload, navigate));
     } else {
+      console.log("🔍 Updating existing post with ID:", currentId);
       dispatch(updatePost(currentId, postPayload));
     }
     clear();
@@ -105,7 +136,7 @@ const Form = ({ currentId, setCurrentId }) => {
         onSubmit={handleSubmit}
       >
         <Typography variant="h6">
-          {currentId ? `Editing "${post.title}"` : "Creating a Memory"}
+          {currentId && post ? `Editing "${post.title}"` : "Creating a Memory"}
         </Typography>
         <TextField
           name="title"
