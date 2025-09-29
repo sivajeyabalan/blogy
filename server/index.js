@@ -15,7 +15,6 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 const allowedOrigins = [
   "https://blogify-sjb.vercel.app",
   "http://localhost:5173",
-  "http://localhost:3000",
   process.env.FRONTEND_URL, // optional override via env
 ].filter(Boolean);
 
