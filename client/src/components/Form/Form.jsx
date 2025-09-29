@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { TextField, Button, Typography, Paper } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  Stack,
+  Box,
+  LinearProgress,
+} from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { createPost, updatePost } from "../../actions/posts";
@@ -14,6 +23,7 @@ const Form = ({ currentId, setCurrentId }) => {
     selectedFile: "",
   });
   const [loading, setLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   const post = useSelector((state) =>
     currentId
@@ -38,6 +48,20 @@ const Form = ({ currentId, setCurrentId }) => {
       });
     }
   }, [post]);
+
+  // Create a preview URL when a File is selected
+  useEffect(() => {
+    if (postData.selectedFile instanceof File) {
+      const url = URL.createObjectURL(postData.selectedFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    if (typeof postData.selectedFile === "string") {
+      setPreviewUrl(postData.selectedFile);
+    } else {
+      setPreviewUrl("");
+    }
+  }, [postData.selectedFile]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -135,67 +159,96 @@ const Form = ({ currentId, setCurrentId }) => {
         className={`${classes.root} ${classes.form}`}
         onSubmit={handleSubmit}
       >
-        <Typography variant="h6">
-          {currentId && post ? `Editing "${post.title}"` : "Creating a Memory"}
-        </Typography>
-        <TextField
-          name="title"
-          variant="outlined"
-          label="Title"
-          fullWidth
-          value={postData.title}
-          onChange={(e) => setPostData({ ...postData, title: e.target.value })}
-        />
-        <TextField
-          name="message"
-          variant="outlined"
-          label="Message"
-          fullWidth
-          multiline
-          rows={4}
-          value={postData.message}
-          onChange={(e) =>
-            setPostData({ ...postData, message: e.target.value })
-          }
-        />
-        <TextField
-          name="tags"
-          variant="outlined"
-          label="Tags (comma separated)"
-          fullWidth
-          value={postData.tags}
-          onChange={(e) => setPostData({ ...postData, tags: e.target.value })}
-        />
+        <Stack spacing={2} sx={{ width: "100%" }}>
+          <Typography variant="h6">
+            {currentId && post ? `Editing "${post.title}"` : "Create a Memory"}
+          </Typography>
 
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        {loading && <p>Uploading image...</p>}
-        {postData.selectedFile && (
-          <img
-            src={postData.selectedFile}
-            alt="Uploaded"
-            style={{ width: "100px", height: "100px", marginTop: "10px" }}
+          <TextField
+            name="title"
+            variant="outlined"
+            label="Title"
+            placeholder="Give your memory a title"
+            fullWidth
+            value={postData.title}
+            onChange={(e) => setPostData({ ...postData, title: e.target.value })}
           />
-        )}
-        <Button
-          className={`${classes.buttonSubmit}`}
-          variant="contained"
-          color="primary"
-          size="large"
-          type="submit"
-          fullWidth
-        >
-          Submit
-        </Button>
-        <Button
-          className={`${classes.buttonClear}`}
-          variant="contained"
-          color="secondary"
-          size="small"
-          onClick={clear}
-          fullWidth
-        >
-          Clear
-        </Button>
+
+          <TextField
+            name="message"
+            variant="outlined"
+            label="Message"
+            placeholder="Share the story behind this moment..."
+            fullWidth
+            multiline
+            rows={4}
+            value={postData.message}
+            onChange={(e) =>
+              setPostData({ ...postData, message: e.target.value })
+            }
+          />
+
+          <TextField
+            name="tags"
+            variant="outlined"
+            label="Tags"
+            placeholder="e.g. travel, family, 2025"
+            helperText="Separate tags with commas"
+            fullWidth
+            value={postData.tags}
+            onChange={(e) => setPostData({ ...postData, tags: e.target.value })}
+          />
+
+          <Box className={classes.uploadArea}>
+            <input
+              id="file-input"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className={classes.hiddenInput}
+            />
+            <label htmlFor="file-input">
+              <Button
+                component="span"
+                startIcon={<CloudUploadIcon />}
+                variant="contained"
+                color="primary"
+                size="large"
+                fullWidth
+              >
+                {postData.selectedFile ? "Change Image" : "Upload Image"}
+              </Button>
+            </label>
+            {loading && <LinearProgress sx={{ width: "100%", mt: 1 }} />}
+          </Box>
+
+          {previewUrl && (
+            <Box className={classes.previewWrapper}>
+              <img className={classes.preview} src={previewUrl} alt="Preview" />
+            </Box>
+          )}
+
+          <Button
+            className={`${classes.buttonSubmit}`}
+            variant="contained"
+            color="primary"
+            size="large"
+            type="submit"
+            fullWidth
+          >
+            Submit
+          </Button>
+          <Button
+            className={`${classes.buttonClear}`}
+            variant="outlined"
+            color="secondary"
+            size="small"
+            onClick={clear}
+            fullWidth
+          >
+            Clear
+          </Button>
+        </Stack>
       </form>
     </Paper>
   );

@@ -9,8 +9,44 @@ import PostDetails from './components/PostDetails/PostDetails';
 
 const theme = createTheme({
   palette: {
-    primary: { main: "#1714CAFF" },
-    secondary: { main: "#dc004e" },
+    primary: { main: "#0E7C66" },
+    secondary: { main: "#FF7A59" },
+    background: { default: "#f7f8fc" },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  typography: {
+    fontFamily:
+      'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"',
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 700 },
+    h3: { fontWeight: 700 },
+    button: { textTransform: "none", fontWeight: 600 },
+  },
+  components: {
+    MuiPaper: {
+      defaultProps: { elevation: 2 },
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 15,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+        },
+      },
+    },
   },
 });
 

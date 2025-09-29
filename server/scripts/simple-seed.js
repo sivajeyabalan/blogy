@@ -27,21 +27,21 @@ async function seed() {
       name: "John Doe",
       email: "john@example.com",
       password: hashedPassword,
-      imageUrl: "https://via.placeholder.com/150",
+      imageUrl: "https://picsum.photos/150/150?random=1",
     });
 
     const user2 = await createUser({
       name: "Jane Smith",
       email: "jane@example.com",
       password: hashedPassword,
-      imageUrl: "https://via.placeholder.com/150",
+      imageUrl: "https://picsum.photos/150/150?random=1",
     });
 
     const user3 = await createUser({
       name: "Google User",
       email: "google@example.com",
       googleId: "google_123456789",
-      imageUrl: "https://via.placeholder.com/150",
+      imageUrl: "https://picsum.photos/150/150?random=1",
       password: "google_123456789",
     });
 
@@ -57,7 +57,7 @@ async function seed() {
         name: "John Doe",
         creator: user1.id,
         tags: ["first", "memory", "test"],
-        selectedFile: "https://via.placeholder.com/400x300",
+        selectedFile: "https://picsum.photos/400/300?random=1",
         likes: [user2.id],
         comments: ["Great first post!", "Welcome to the app!"],
       },
@@ -68,7 +68,7 @@ async function seed() {
         name: "Jane Smith",
         creator: user2.id,
         tags: ["sunset", "nature", "vacation", "photography"],
-        selectedFile: "https://via.placeholder.com/400x300",
+        selectedFile: "https://picsum.photos/400/300?random=1",
         likes: [user1.id, user3.id],
         comments: ["Stunning!", "Where was this taken?"],
       },
@@ -79,7 +79,7 @@ async function seed() {
         name: "Google User",
         creator: user3.id,
         tags: ["tech", "conference", "learning", "2024"],
-        selectedFile: "https://via.placeholder.com/400x300",
+        selectedFile: "https://picsum.photos/400/300?random=1",
         likes: [],
         comments: ["What was your favorite talk?"],
       },
@@ -90,7 +90,7 @@ async function seed() {
         name: "John Doe",
         creator: user1.id,
         tags: ["cooking", "pasta", "homemade", "adventure"],
-        selectedFile: "https://via.placeholder.com/400x300",
+        selectedFile: "https://picsum.photos/400/300?random=1",
         likes: [user2.id],
         comments: ["Recipe please!", "Looks delicious!"],
       },
@@ -101,7 +101,7 @@ async function seed() {
         name: "Jane Smith",
         creator: user2.id,
         tags: ["hiking", "mountains", "weekend", "nature"],
-        selectedFile: "https://via.placeholder.com/400x300",
+        selectedFile: "https://picsum.photos/400/300?random=1",
         likes: [user1.id, user3.id],
         comments: ["Which trail did you take?", "Amazing views!"],
       },

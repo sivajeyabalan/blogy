@@ -152,7 +152,7 @@ const PostDetails = () => {
 
           <Button
             size="small"
-            color="primary"
+            color={hasLikedPost ? "error" : "primary"}
             disabled={!user?.result || isProcessingLike}
             onClick={handleLike}
             sx={{
@@ -162,7 +162,7 @@ const PostDetails = () => {
             }}
           >
             {hasLikedPost ? (
-              <ThumbUpAltIcon color="primary" fontSize="small" />
+              <ThumbUpAltIcon color="error" fontSize="small" />
             ) : (
               <ThumbUpAltOutlined fontSize="small" />
             )}

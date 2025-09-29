@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AppBar, Toolbar, Typography, Avatar, Button, IconButton } from "@mui/material";
 import useStyles from "./styles";
-import memoriesLogo from "../../images/memories-Logo.png";
-import memoriesText from "../../images/memories-Text.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
@@ -45,13 +43,13 @@ const Navbar = () => {
 
         if (user.result.googleId && user.result.imageUrl) {
             return (
-                <Avatar
+                        <Avatar
                     className={classes.purple}
                     alt={user.result.name}
                     src={user.result.imageUrl}
                     onError={(e) => {
                         e.target.src = null;
-                        e.target.style.backgroundColor = "#3357FF";
+                        e.target.style.backgroundColor = "#0E7C66";
                         e.target.innerHTML = user.result.name.charAt(0);
                     }}
                 />
@@ -62,7 +60,7 @@ const Navbar = () => {
             <Avatar
                 className={classes.purple}
                 alt={user.result.name}
-                style={{ backgroundColor: "#3357FF" }}
+                style={{ backgroundColor: "#0E7C66" }}
             >
                 {user.result.name.charAt(0)}
             </Avatar>
@@ -76,8 +74,8 @@ const Navbar = () => {
                       className={classes.brandContainer}
                       style={{ textDecoration: 'none', color: 'black' }}
                     >
-                      <h1 style={{ fontWeight: 'bold', fontSize: '24px' }}>VenueVista</h1>
-                      <img className={classes.image} src={memoriesLogo} alt="icon" height="40px" />
+                      <h1 style={{ fontWeight: 'bold', fontSize: '24px' }}>Blogify</h1>
+                      
                     </Link>
             </div>
 

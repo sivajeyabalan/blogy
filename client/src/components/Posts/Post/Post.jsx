@@ -247,13 +247,13 @@ const Post = ({ post, setCurrentId }) => {
       <CardActions sx={{ p: 2, pt: 0 }}>
         <Button
           size="small"
-          color="primary"
+          color={hasLikedPost ? "error" : "primary"}
           disabled={!user?.result || isProcessingLike}
           onClick={handleLike}
           sx={{ opacity: isProcessingLike ? 0.7 : 1 }}
         >
           {hasLikedPost ? (
-            <ThumbUpAltIcon color="primary" fontSize="small" />
+            <ThumbUpAltIcon color="error" fontSize="small" />
           ) : (
             <ThumbUpAltOutlined fontSize="small" />
           )}

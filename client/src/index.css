@@ -1,3 +1,9 @@
 body {
   background-color: #f7f8fc;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
 }

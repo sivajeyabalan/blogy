@@ -10,6 +10,9 @@ export default makeStyles((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
     padding: "10px 50px",
+    backdropFilter: "saturate(180%) blur(4px)",
+    background: "rgba(255,255,255,0.9)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
     [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
       padding: "10px 20px",
@@ -39,8 +42,8 @@ export default makeStyles((theme) => ({
     marginRight: "10px",
   },
   purple: {
-    color: theme.palette.getContrastText(deepPurple[500]),
-    backgroundColor: deepPurple[500],
+    color: theme.palette.getContrastText(theme.palette.primary.main),
+    backgroundColor: theme.palette.primary.main,
   },
   profileButton: {
     marginLeft: "20px",
