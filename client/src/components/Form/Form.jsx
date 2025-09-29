@@ -24,6 +24,7 @@ const Form = ({ currentId, setCurrentId }) => {
   });
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [removeImage, setRemoveImage] = useState(false);
 
   const post = useSelector((state) =>
     currentId
@@ -99,6 +100,7 @@ const Form = ({ currentId, setCurrentId }) => {
       tags: formattedTags,
       title: trimmedTitle,
       name: user?.result?.name,
+      removeImage,
     };
 
     console.log(
@@ -128,6 +130,7 @@ const Form = ({ currentId, setCurrentId }) => {
     const file = e.target.files[0];
     if (file) {
       setPostData({ ...postData, selectedFile: file });
+      setRemoveImage(false);
     }
   };
 
@@ -225,6 +228,19 @@ const Form = ({ currentId, setCurrentId }) => {
           {previewUrl && (
             <Box className={classes.previewWrapper}>
               <img className={classes.preview} src={previewUrl} alt="Preview" />
+              <Button
+                variant="text"
+                color="secondary"
+                onClick={() => {
+                  setPostData({ ...postData, selectedFile: "" });
+                  setPreviewUrl("");
+                  setRemoveImage(true);
+                }}
+                sx={{ mt: 1 }}
+                fullWidth
+              >
+                Remove Image
+              </Button>
             </Box>
           )}
 

@@ -6,6 +6,7 @@ const API = axios.create({
     : import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
 });
 
+
 API.interceptors.request.use((req) => {
   if (localStorage.getItem("profile")) {
     req.headers.Authorization = `Bearer ${

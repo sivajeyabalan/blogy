@@ -140,19 +140,38 @@ export const createPostController = async (req, res) => {
 
 export const updatePostController = async (req, res) => {
   const { id } = req.params;
-  const { title, message, creator, selectedFile, tags } = req.body;
+  const { title, message, creator, selectedFile, tags, removeImage } = req.body;
 
   console.log("🔍 updatePostController - id:", id, "type:", typeof id);
 
   try {
-    // Map camelCase to snake_case for database
-    const updateData = {
-      title,
-      message,
-      creator,
-      selected_file: selectedFile, // Map selectedFile to selected_file
-      tags,
-    };
+    // Build update data and handle upload/remove image
+    let parsedTags = tags;
+    if (typeof parsedTags === "string") {
+      try {
+        // Try JSON first: "[\"tag\"]"
+        parsedTags = JSON.parse(parsedTags);
+      } catch (e) {
+        // Fallback: comma separated string
+        parsedTags = parsedTags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t !== "");
+      }
+    }
+
+    const updateData = { title, message, creator, tags: parsedTags };
+
+    // If a new file was uploaded through multer
+    if (req.file && req.file.path) {
+      updateData.selected_file = req.file.path;
+    } else if (removeImage === "true") {
+      // Explicit remove image request
+      updateData.selected_file = "";
+    } else if (selectedFile !== undefined) {
+      // Preserve or update via JSON body
+      updateData.selected_file = selectedFile;
+    }
 
     const updatedPost = await updatePost(id, updateData);
     res.json(updatedPost);

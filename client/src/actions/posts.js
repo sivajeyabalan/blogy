@@ -92,7 +92,18 @@ export const createPost = (post, navigate) => async (dispatch) => {
 export const updatePost = (id, post) => async (dispatch) => {
   try {
     console.log("🔍 updatePost action - id:", id, "type:", typeof id);
-    const { data } = await api.updatePost(id, post);
+    let payload = post;
+    if (post.selectedFile instanceof File) {
+      const formData = new FormData();
+      formData.append("file", post.selectedFile);
+      formData.append("title", post.title || "");
+      formData.append("message", post.message || "");
+      formData.append("tags", JSON.stringify(post.tags || []));
+      if (post.name) formData.append("name", post.name);
+      if (post.removeImage) formData.append("removeImage", "true");
+      payload = formData;
+    }
+    const { data } = await api.updatePost(id, payload);
     dispatch({ type: UPDATE, payload: data });
   } catch (error) {
     console.error("Update post error:", error.response?.data || error.message);

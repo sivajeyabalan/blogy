@@ -18,7 +18,7 @@ router.get("/", getPosts);
 router.get("/search", getPostsBySearch);
 router.get("/:id", getPost);
 router.post("/", auth, upload.single("file"), createPostController);
-router.patch("/:id", auth, updatePostController);
+router.patch("/:id", auth, upload.single("file"), updatePostController);
 router.delete("/:id", auth, deletePostController);
 router.patch("/:id/likePost", auth, likePostController);
 router.patch("/:id/commentPost", auth, commentPostController);

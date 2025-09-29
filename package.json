@@ -1,0 +1,16 @@
+{
+    "name": "blogify",
+    "version": "1.0.0",
+    "description": "Blogify is a platform for creating and sharing blog posts.",
+    "main": "server/ , client/",
+    "type": "module",
+    "scripts": {
+      "dev": "npm run dev --prefix server && npm run dev --prefix client",
+      "start": "npm run start --prefix server && npm run start --prefix client"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+    
+  }
+  
