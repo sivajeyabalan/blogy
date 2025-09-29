@@ -11,7 +11,37 @@ dotenv.config();
 
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors({ origin: "*", credentials: true }));
+// Restrict CORS to allowed origins
+const allowedOrigins = [
+  "https://blogify-sjb.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL, // optional override via env
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests (no Origin) and allowed origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+    ],
+  })
+);
+
+// Handle preflight for all routes
+app.options("*", cors());
 
 // Set timeout for requests (especially for file uploads)
 app.use((req, res, next) => {
