@@ -44,8 +44,8 @@ app.options("*", cors());
 
 // Set timeout for requests (especially for file uploads)
 app.use((req, res, next) => {
-  req.setTimeout(120000); // 2 minutes
-  res.setTimeout(120000); // 2 minutes
+  req.setTimeout(300000); // 5 minutes
+  res.setTimeout(300000); // 5 minutes
   next();
 });
 

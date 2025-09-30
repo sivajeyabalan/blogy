@@ -72,8 +72,16 @@ export const getPostsBySearch = async (req, res) => {
 
 export const createPostController = async (req, res) => {
   try {
-    console.log("Creating post with data:", req.body);
-    console.log("File uploaded:", req.file ? "Yes" : "No");
+    console.log("🚀 Creating post with data:", req.body);
+    console.log("📁 File uploaded:", req.file ? "Yes" : "No");
+    console.log("👤 User ID:", req.userId);
+
+    // Validate required fields
+    if (!req.body.title || !req.body.message) {
+      return res.status(400).json({
+        message: "Title and message are required",
+      });
+    }
 
     // Parse tags if they're sent as JSON string
     let tags = req.body.tags;
@@ -100,23 +108,36 @@ export const createPostController = async (req, res) => {
     // Handle file upload with timeout protection
     if (req.file) {
       try {
+        console.log("📤 Processing file upload...");
         if (req.file.path) {
+          // Cloudinary upload successful
           postData.selectedFile = req.file.path;
-          console.log("File uploaded to Cloudinary:", req.file.path);
+          console.log("✅ File uploaded to Cloudinary:", req.file.path);
+        } else if (req.file.buffer) {
+          // Memory storage fallback - convert to base64
+          const base64 = req.file.buffer.toString("base64");
+          const mimeType = req.file.mimetype;
+          postData.selectedFile = `data:${mimeType};base64,${base64}`;
+          console.log("✅ File stored in memory as base64");
         } else {
-          console.log("File uploaded but no path available:", req.file);
+          console.log(
+            "⚠️ File uploaded but no path or buffer available:",
+            req.file
+          );
           postData.selectedFile = ""; // No image
         }
       } catch (uploadError) {
-        console.error("File upload error:", uploadError);
+        console.error("❌ File upload error:", uploadError);
         postData.selectedFile = ""; // Fallback to no image
       }
     } else if (req.body.selectedFile) {
       // Handle case where selectedFile is passed in body (no file upload)
       postData.selectedFile = req.body.selectedFile;
+      console.log("📄 Using existing file:", req.body.selectedFile);
     } else {
       // No file provided, set empty string
       postData.selectedFile = "";
+      console.log("📄 No file provided");
     }
 
     // Map camelCase to snake_case for database
@@ -125,12 +146,22 @@ export const createPostController = async (req, res) => {
       delete postData.selectedFile;
     }
 
-    console.log("Final post data:", postData);
+    console.log("💾 Final post data:", postData);
+    console.log("🗄️ Saving to database...");
+
     const newPost = await createPost(postData);
+    console.log("✅ Post created successfully:", newPost);
+
     res.status(201).json(newPost);
   } catch (error) {
-    console.error("Error creating post:", error);
-    console.error("Error details:", error.message);
+    console.error("❌ Error creating post:", error);
+    console.error("❌ Error stack:", error.stack);
+    console.error("❌ Error details:", {
+      message: error.message,
+      name: error.name,
+      code: error.code,
+    });
+
     res.status(500).json({
       message: "Failed to create post",
       error: error.message,

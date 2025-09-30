@@ -29,6 +29,25 @@ router.post("/test", upload.single("file"), (req, res) => {
     message: "Test endpoint working",
     body: req.body,
     file: req.file ? "File received" : "No file",
+    fileDetails: req.file
+      ? {
+          fieldname: req.file.fieldname,
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          hasPath: !!req.file.path,
+          hasBuffer: !!req.file.buffer,
+        }
+      : null,
+  });
+});
+
+// Simple test route without file upload
+router.post("/test-simple", (req, res) => {
+  res.json({
+    message: "Simple test endpoint working",
+    body: req.body,
+    headers: req.headers,
   });
 });
 

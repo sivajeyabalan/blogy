@@ -174,7 +174,9 @@ const Form = ({ currentId, setCurrentId }) => {
             placeholder="Give your memory a title"
             fullWidth
             value={postData.title}
-            onChange={(e) => setPostData({ ...postData, title: e.target.value })}
+            onChange={(e) =>
+              setPostData({ ...postData, title: e.target.value })
+            }
           />
 
           <TextField
@@ -200,6 +202,11 @@ const Form = ({ currentId, setCurrentId }) => {
             fullWidth
             value={postData.tags}
             onChange={(e) => setPostData({ ...postData, tags: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+              }
+            }}
           />
 
           <Box className={classes.uploadArea}>

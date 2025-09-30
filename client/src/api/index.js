@@ -4,8 +4,12 @@ const API = axios.create({
   baseURL: import.meta.env.DEV
     ? "http://localhost:5000"
     : import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  timeout: 300000, // 5 minutes timeout
 });
 
+// const API = axios.create({
+//   baseURL:  "http://localhost:5000"
+// });
 
 API.interceptors.request.use((req) => {
   if (localStorage.getItem("profile")) {
