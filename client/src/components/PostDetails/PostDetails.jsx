@@ -25,7 +25,9 @@ const PostDetails = () => {
   const classes = useStyles();
   const { id } = useParams();
 
-  const { post, posts, isLoading } = useSelector((state) => state.posts);
+  const { post, posts, searchResults, isLoading } = useSelector(
+    (state) => state.posts
+  );
   const user = JSON.parse(localStorage.getItem("profile"));
   const userId = user?.result?.googleId || user?.result?.id;
 
@@ -108,7 +110,7 @@ const PostDetails = () => {
     );
   }
 
-  const recommendedPosts = posts.filter(
+  const recommendedPosts = (searchResults || posts).filter(
     ({ _id, id }) => (id || _id) !== (post.id || post._id)
   );
 

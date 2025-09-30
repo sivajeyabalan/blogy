@@ -8,11 +8,20 @@ import {
   TextField,
   Button,
   Autocomplete,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import Posts from "../Posts/Posts";
 import { useNavigate, useLocation } from "react-router-dom";
 import Form from "../Form/Form.jsx";
-import { getPosts, getPostsBySearch } from "../../actions/posts";
+import {
+  getPosts,
+  getPostsBySearch,
+  smartRefreshPosts,
+  debugCache,
+  clearSearch,
+} from "../../actions/posts";
 import { useDispatch } from "react-redux";
 import useStyles from "./styles";
 import Pagination from "../Pagination.jsx";
@@ -33,7 +42,10 @@ const Home = () => {
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    dispatch(getPosts(page));
+    // Clear search results when returning to main view
+    dispatch(clearSearch());
+    // Use smart caching - only fetch if cache is stale or empty
+    dispatch(smartRefreshPosts(page));
   }, [dispatch, page]);
 
   const searchPost = () => {
@@ -56,6 +68,16 @@ const Home = () => {
     }
   };
 
+  const handleRefresh = () => {
+    console.log("🔄 Manual refresh triggered");
+    dispatch(getPosts(page, true)); // Force refresh
+  };
+
+  const handleDebugCache = () => {
+    console.log("🐛 Debug cache triggered");
+    dispatch(debugCache());
+  };
+
   return (
     <Grow in>
       <Container maxWidth="xl">
@@ -67,6 +89,29 @@ const Home = () => {
           spacing={3}
         >
           <Grid item xs={12} sm={6} md={9}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}
+            >
+              <h2 style={{ margin: 0, flexGrow: 1 }}>Memories</h2>
+              <Tooltip title="Debug cache">
+                <IconButton
+                  onClick={handleDebugCache}
+                  color="secondary"
+                  size="small"
+                >
+                  🐛
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Refresh posts">
+                <IconButton onClick={handleRefresh} color="primary">
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
             <Posts setCurrentId={setCurrentId} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>

@@ -10,3 +10,6 @@ export const LOGOUT = "LOGOUT";
 export const FETCH_BY_SEARCH = "FETCH_BY_SEARCH";
 export const FETCH_POST = "FETCH_POST";
 export const COMMENT = "COMMENT";
+export const MARK_STALE = "MARK_STALE";
+export const REFRESH_CACHE = "REFRESH_CACHE";
+export const CLEAR_SEARCH = "CLEAR_SEARCH";
