@@ -1,37 +1,25 @@
 import postgres from "postgres";
 import "dotenv/config";
 
-// Build DATABASE_URL from Render environment variables
-const buildDatabaseUrl = () => {
-  const host = process.env.PGHOST;
-  const port = process.env.PGPORT;
-  const database = process.env.PGDB;
-  const user = process.env.PGUSER;
-  const password = process.env.PGPASSWORD;
+// Use DATABASE_URL from environment (Supabase connection string)
+if (!process.env.DATABASE_URL) {
+  throw new Error("Missing required DATABASE_URL environment variable");
+}
 
-  if (!host || !port || !database || !user || !password) {
-    throw new Error(
-      "Missing required Render PostgreSQL environment variables: PGHOST, PGPORT, PGDB, PGUSER, PGPASSWORD"
-    );
-  }
-
-  return `postgresql://${user}:${password}@${host}:${port}/${database}?sslmode=require&connection_limit=5&pool_timeout=20`;
-};
-
-// Use provided DATABASE_URL or build from Render variables
-const databaseUrl = process.env.DATABASE_URL || buildDatabaseUrl();
+const databaseUrl = process.env.DATABASE_URL;
 
 // Simple postgres connection
 const sql = postgres(databaseUrl, {
-  // Optimized connection pool settings for Render
-  max: process.env.DB_CONNECTION_LIMIT
-    ? parseInt(process.env.DB_CONNECTION_LIMIT)
-    : 5,
-  idle_timeout: 20, // Close idle connections after 20 seconds
-  connect_timeout: 30, // Connection timeout in seconds
+  // Connection pool settings optimized for Supabase
+  max: 5, // Maximum connections in pool
+  idle_timeout: 0, // Disable idle timeout (Supabase handles this)
+  connect_timeout: 15, // Connection timeout in seconds
 
-  // SSL configuration for Render
-  ssl: "require",
+  // SSL configuration for Supabase
+  ssl: {
+    rejectUnauthorized: false,
+    ca: process.env.CA_CERT, // Supabase CA certificate if provided
+  },
 
   // Retry configuration
   max_lifetime: 60 * 30, // 30 minutes

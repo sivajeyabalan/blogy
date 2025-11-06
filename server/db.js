@@ -18,8 +18,8 @@ const buildDatabaseUrl = () => {
   return `postgresql://${user}:${password}@${host}:${port}/${database}?sslmode=require&connection_limit=5&pool_timeout=0`;
 };
 
-// Use provided DATABASE_URL or build from Render variables
-const databaseUrl = process.env.DATABASE_URL || buildDatabaseUrl();
+// Use provided DATABASE_URL directly
+const databaseUrl = process.env.DATABASE_URL;
 
 // Optimized postgres configuration for Render PostgreSQL
 const sql = postgres(databaseUrl, {
@@ -31,7 +31,9 @@ const sql = postgres(databaseUrl, {
   connect_timeout: 30, // Connection timeout in seconds
 
   // SSL configuration for Render
-  ssl: "require",
+  ssl: {
+    rejectUnauthorized: false,
+  },
 
   // Retry configuration
   max_lifetime: 60 * 30, // 30 minutes (longer for Render)

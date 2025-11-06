@@ -1,38 +1,9 @@
 #!/usr/bin/env node
 
-import { PrismaClient } from "@prisma/client";
+import sql from "../database/simple-db.js";
 import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-// Build DATABASE_URL from Render environment variables
-const buildDatabaseUrl = () => {
-  const host = process.env.PGHOST;
-  const port = process.env.PGPORT;
-  const database = process.env.PGDB;
-  const user = process.env.PGUSER;
-  const password = process.env.PGPASSWORD;
-
-  if (!host || !port || !database || !user || !password) {
-    throw new Error(
-      "Missing required Render PostgreSQL environment variables: PGHOST, PGPORT, PGDB, PGUSER, PGPASSWORD"
-    );
-  }
-
-  return `postgresql://${user}:${password}@${host}:${port}/${database}?sslmode=require&connection_limit=5&pool_timeout=0`;
-};
-
-// Use provided DATABASE_URL or build from Render variables
-const databaseUrl = process.env.DATABASE_URL || buildDatabaseUrl();
-
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: databaseUrl,
-    },
-  },
-});
+import cloudinary from "../config/cloudinary.js";
+import "dotenv/config";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");
@@ -40,141 +11,270 @@ async function seed() {
   try {
     // Clear existing data
     console.log("🧹 Clearing existing data...");
-    await prisma.post.deleteMany();
-    await prisma.user.deleteMany();
+    await sql`DELETE FROM posts`;
+    await sql`DELETE FROM users`;
 
     // Create test users
     console.log("👥 Creating test users...");
     const hashedPassword = await bcrypt.hash("password123", 12);
 
-    const user1 = await prisma.user.create({
-      data: {
-        name: "John Doe",
-        email: "john@example.com",
-        password: hashedPassword,
-        imageUrl: "https://picsum.photos/150/150?random=1",
-      },
-    });
+    async function uploadToCloudinary(url, folder = "memories/seed") {
+      // Try direct upload first (Cloudinary fetching remote URL).
+      try {
+        const res = await cloudinary.uploader.upload(url, {
+          folder,
+          timeout: 300000,
+        });
+        return res.secure_url || url;
+      } catch (err) {
+        console.warn(
+          "⚠️ Cloudinary direct upload failed, will attempt download+upload:",
+          err.message
+        );
+      }
 
-    const user2 = await prisma.user.create({
-      data: {
-        name: "Jane Smith",
-        email: "jane@example.com",
-        password: hashedPassword,
-        imageUrl: "https://picsum.photos/150/150?random=1",
-      },
-    });
+      // If direct upload fails (remote fetch blocked), download the image and upload as base64 data URI.
+      try {
+        // Use global fetch when available (Node 18+). If not available, attempt dynamic import of 'node-fetch'.
+        let fetchFn = global.fetch;
+        if (typeof fetchFn !== "function") {
+          try {
+            const nodeFetch = await import("node-fetch");
+            fetchFn = nodeFetch.default || nodeFetch;
+          } catch (e) {
+            console.warn(
+              "⚠️ 'fetch' not available and 'node-fetch' not installed. Skipping download upload."
+            );
+            return url;
+          }
+        }
 
-    const user3 = await prisma.user.create({
-      data: {
-        name: "Google User",
-        email: "google@example.com",
-        googleId: "google_123456789",
-        imageUrl: "https://picsum.photos/150/150?random=1",
-        password: "google_123456789",
-      },
-    });
+        const resp = await fetchFn(url);
+        if (!resp || !resp.ok) {
+          throw new Error(`Failed to download image: ${resp && resp.status}`);
+        }
 
-    console.log(`✅ Created ${3} users`);
+        const contentType =
+          (resp.headers &&
+            (resp.headers.get
+              ? resp.headers.get("content-type")
+              : resp.headers["content-type"])) ||
+          "image/jpeg";
+        const arrayBuffer = await resp.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString("base64");
+        const dataUri = `data:${contentType};base64,${base64}`;
 
-    // Create test posts
-    console.log("📝 Creating test posts...");
+        const res2 = await cloudinary.uploader.upload(dataUri, {
+          folder,
+          timeout: 300000,
+        });
+        return res2.secure_url || url;
+      } catch (err2) {
+        console.warn(
+          "⚠️ Download+upload to Cloudinary failed, using original URL:",
+          err2.message
+        );
+        return url;
+      }
+    }
+
+    const avatar1 = await uploadToCloudinary(
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330"
+    );
+
+    const avatar2 = await uploadToCloudinary(
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
+    );
+
+    const [user1] = await sql`
+      INSERT INTO users (name, email, password, image_url)
+      VALUES (
+        'Sarah Chen',
+        'sarah.chen@email.com',
+        ${hashedPassword},
+        ${avatar1}
+      )
+      RETURNING id, name
+    `;
+
+    const [user2] = await sql`
+      INSERT INTO users (name, email, password, image_url)
+      VALUES (
+        'James Wilson',
+        'james.wilson@email.com',
+        ${hashedPassword},
+        ${avatar2}
+      )
+      RETURNING id, name
+    `;
+
+    console.log("✅ Created test users");
+
+    // Create realistic posts
+    console.log("📝 Creating posts...");
 
     const posts = [
       {
-        title: "My First Memory",
-        message: "This is my first post on the Memories app!",
-        name: "John Doe",
+        title: "Sunrise Yoga at the Beach",
+        message:
+          "Started my day with a peaceful yoga session at Venice Beach. The sound of waves and the morning breeze made it absolutely perfect. Who else loves beach yoga? 🧘‍♀️🌊 #morningroutine #beachyoga #wellness",
+        name: user1.name,
         creator: user1.id,
-        tags: ["first", "memory", "test"],
-        selectedFile: "https://picsum.photos/400/300?random=1",
+        tags: ["yoga", "beach", "wellness", "morning"],
+        selected_file:
+          "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
         likes: [user2.id],
-        comments: ["Great first post!", "Welcome to the app!"],
+        comments: ["This looks so peaceful!", "I need to try this!"],
       },
       {
-        title: "Beautiful Sunset",
+        title: "Weekend Hiking Adventure",
         message:
-          "Captured this amazing sunset during my vacation. Nature never fails to amaze me!",
-        name: "Jane Smith",
+          "Conquered Mount Rainier this weekend! The view from the top was absolutely breathtaking. 14 miles and 4,000 ft elevation gain - totally worth every step. Remember to always stay hydrated and respect nature! 🏔️ #hiking #adventure",
+        name: user2.name,
         creator: user2.id,
-        tags: ["sunset", "nature", "vacation", "photography"],
-        selectedFile: "https://picsum.photos/400/300?random=1",
-        likes: [user1.id, user3.id],
-        comments: ["Stunning!", "Where was this taken?"],
+        tags: ["hiking", "mountains", "adventure", "nature"],
+        selected_file:
+          "https://images.unsplash.com/photo-1551632811-561732d1e306",
+        likes: [user1.id],
+        comments: [
+          "Amazing view!",
+          "Which trail did you take?",
+          "Looking forward to trying this route!",
+        ],
       },
       {
-        title: "Tech Conference 2024",
+        title: "Homemade Sourdough Success!",
         message:
-          "Just attended an amazing tech conference. Learned so much about the latest technologies!",
-        name: "Google User",
-        creator: user3.id,
-        tags: ["tech", "conference", "learning", "2024"],
-        selectedFile: "https://picsum.photos/400/300?random=1",
+          "After months of practice, finally achieved the perfect sourdough crumb! The secret? Patience and maintaining the right temperature during fermentation. Swipe for the crumb shot! 🍞 #baking #sourdough #homemade",
+        name: user1.name,
+        creator: user1.id,
+        tags: ["baking", "sourdough", "food", "homemade"],
+        selected_file:
+          "https://images.unsplash.com/photo-1585478259715-4d75bf3b870b",
+        likes: [user2.id],
+        comments: ["That crust looks perfect!", "Would love your recipe!"],
+      },
+      {
+        title: "Urban Photography",
+        message:
+          "Captured this moment during golden hour in downtown Seattle. Sometimes the most beautiful scenes are right in our own city. Love how the light plays with the architecture. 📸 #photography #urban #seattle",
+        name: user2.name,
+        creator: user2.id,
+        tags: ["photography", "urban", "seattle", "architecture"],
+        selected_file:
+          "https://images.unsplash.com/photo-1519501025264-65ba15a82390",
         likes: [],
-        comments: ["What was your favorite talk?"],
+        comments: ["The lighting is perfect!", "This angle is everything"],
       },
       {
-        title: "Cooking Adventure",
+        title: "First Harvest from My Garden",
         message:
-          "Tried making homemade pasta for the first time. It was harder than expected but totally worth it!",
-        name: "John Doe",
+          "Can't believe these came from my tiny balcony garden! Fresh tomatoes, basil, and peppers. Nothing beats home-grown vegetables. Starting small but dreaming big! 🌱 #gardening #organic #homegrown",
+        name: user1.name,
         creator: user1.id,
-        tags: ["cooking", "pasta", "homemade", "adventure"],
-        selectedFile: "https://picsum.photos/400/300?random=1",
+        tags: ["gardening", "organic", "food", "sustainable"],
+        selected_file:
+          "https://images.unsplash.com/photo-1592419044706-39796d40f98c",
         likes: [user2.id],
-        comments: ["Recipe please!", "Looks delicious!"],
+        comments: ["Those tomatoes look amazing!", "Any tips for beginners?"],
       },
       {
-        title: "Weekend Hiking",
+        title: "Weekend Music Session",
         message:
-          "Spent the weekend hiking in the mountains. The fresh air and beautiful views were exactly what I needed.",
-        name: "Jane Smith",
+          "Nothing better than jamming with friends on a Sunday afternoon. Music has this amazing way of bringing people together. Working on some new original material! 🎸 #music #jamming #weekend",
+        name: user2.name,
         creator: user2.id,
-        tags: ["hiking", "mountains", "weekend", "nature"],
-        selectedFile: "https://picsum.photos/400/300?random=1",
-        likes: [user1.id, user3.id],
-        comments: ["Which trail did you take?", "Amazing views!"],
+        tags: ["music", "friends", "weekend", "creative"],
+        selected_file:
+          "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
+        likes: [user1.id],
+        comments: ["When's the next gig?", "Love the vibe!"],
+      },
+      {
+        title: "Sunset at the Lake",
+        message:
+          "Found this perfect spot for watching the sunset at Lake Washington. Sometimes you need to take a moment to appreciate the simple things in life. The colors tonight were incredible! 🌅 #sunset #lakewashington #peace",
+        name: user1.name,
+        creator: user1.id,
+        tags: ["sunset", "lake", "nature", "peace"],
+        selected_file:
+          "https://images.unsplash.com/photo-1494548162494-384bba4ab999",
+        likes: [],
+        comments: ["Stunning colors!", "Perfect evening spot"],
+      },
+      {
+        title: "First Marathon Complete!",
+        message:
+          "6 months of training led to this moment. Just completed my first marathon! Not about the time, but about proving to myself that I can do hard things. Thank you to everyone who supported me! 🏃‍♂️ #marathon #running #achievement",
+        name: user2.name,
+        creator: user2.id,
+        tags: ["running", "marathon", "fitness", "achievement"],
+        selected_file:
+          "https://images.unsplash.com/photo-1552674605-db6ffd4facb5",
+        likes: [user1.id],
+        comments: ["Congratulations!", "You're inspiring!", "What's next?"],
+      },
+      {
+        title: "Exploring Street Art",
+        message:
+          "Discovered this amazing mural while exploring the city today. The street art scene here is incredible. Each piece tells a story and adds so much character to the neighborhood. 🎨 #streetart #urban #art",
+        name: user1.name,
+        creator: user1.id,
+        tags: ["art", "streetart", "urban", "culture"],
+        selected_file:
+          "https://images.unsplash.com/photo-1532930525088-e23a7029fa81",
+        likes: [user2.id],
+        comments: ["Where is this?", "The colors are amazing!"],
+      },
+      {
+        title: "Cozy Rainy Day",
+        message:
+          "Perfect rainy day setup: hot coffee, good book, and jazz playing in the background. Sometimes the best adventures happen at home. What's your favorite rainy day activity? ☕📚 #cozy #reading #rainyday",
+        name: user2.name,
+        creator: user2.id,
+        tags: ["cozy", "reading", "coffee", "lifestyle"],
+        selected_file:
+          "https://images.unsplash.com/photo-1515592302748-6c5ea17e2f0e",
+        likes: [user1.id],
+        comments: ["This looks so peaceful", "What book are you reading?"],
       },
     ];
 
-    for (const postData of posts) {
-      await prisma.post.create({
-        data: postData,
-      });
+    // Upload post images to Cloudinary and insert posts
+    for (const post of posts) {
+      const uploadedUrl = await uploadToCloudinary(post.selected_file);
+
+      await sql`
+        INSERT INTO posts (
+          title, message, name, creator, tags, selected_file, likes, comments
+        ) VALUES (
+          ${post.title},
+          ${post.message},
+          ${post.name},
+          ${post.creator},
+          ${post.tags},
+          ${uploadedUrl},
+          ${post.likes},
+          ${post.comments}
+        )
+      `;
     }
 
-    console.log(`✅ Created ${posts.length} posts`);
+    console.log("✅ Created 10 posts");
 
     // Verify data
-    const userCount = await prisma.user.count();
-    const postCount = await prisma.post.count();
+    const [{ count: userCount }] =
+      await sql`SELECT COUNT(*) as count FROM users`;
+    const [{ count: postCount }] =
+      await sql`SELECT COUNT(*) as count FROM posts`;
 
     console.log("\n📊 Database seeded successfully!");
     console.log(`👥 Users: ${userCount}`);
     console.log(`📝 Posts: ${postCount}`);
-
-    // Show sample data
-    const samplePosts = await prisma.post.findMany({
-      take: 2,
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    console.log("\n📋 Sample posts:");
-    samplePosts.forEach((post, index) => {
-      console.log(`${index + 1}. "${post.title}" by ${post.user.name}`);
-    });
   } catch (error) {
     console.error("❌ Seeding failed:", error);
-    process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    await sql.end();
   }
 }
 
