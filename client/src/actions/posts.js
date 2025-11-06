@@ -306,18 +306,3 @@ export const smartRefreshPosts = (page) => async (dispatch, getState) => {
     console.log("📦 Cache is fresh, no refresh needed");
   }
 };
-
-// Debug function to inspect cache state
-export const debugCache = () => (dispatch, getState) => {
-  const state = getState().posts;
-  console.log("🐛 Cache Debug Info:", {
-    postsCount: state.posts?.length || 0,
-    isLoading: state.isLoading,
-    lastFetched: state.lastFetched,
-    isStale: state.isStale,
-    cacheExpiry: state.cacheExpiry,
-    currentPage: state.currentPage,
-    numberOfPages: state.numberOfPages,
-    postIds: state.posts?.map((p) => p.id || p._id) || [],
-  });
-};

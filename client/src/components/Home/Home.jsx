@@ -19,8 +19,8 @@ import {
   getPosts,
   getPostsBySearch,
   smartRefreshPosts,
-  debugCache,
   clearSearch,
+  markCacheStale,
 } from "../../actions/posts";
 import { useDispatch } from "react-redux";
 import useStyles from "./styles";
@@ -69,13 +69,8 @@ const Home = () => {
   };
 
   const handleRefresh = () => {
-    console.log("🔄 Manual refresh triggered");
-    dispatch(getPosts(page, true)); // Force refresh
-  };
-
-  const handleDebugCache = () => {
-    console.log("🐛 Debug cache triggered");
-    dispatch(debugCache());
+    dispatch(markCacheStale());
+    dispatch(getPosts(page, true));
   };
 
   return (
@@ -97,17 +92,12 @@ const Home = () => {
               }}
             >
               <h2 style={{ margin: 0, flexGrow: 1 }}>Memories</h2>
-              <Tooltip title="Debug cache">
-                <IconButton
-                  onClick={handleDebugCache}
-                  color="secondary"
-                  size="small"
-                >
-                  🐛
-                </IconButton>
-              </Tooltip>
               <Tooltip title="Refresh posts">
-                <IconButton onClick={handleRefresh} color="primary">
+                <IconButton
+                  onClick={handleRefresh}
+                  color="primary"
+                  aria-label="refresh"
+                >
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
