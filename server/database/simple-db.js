@@ -11,14 +11,20 @@ const databaseUrl = process.env.DATABASE_URL;
 // Simple postgres connection
 const sql = postgres(databaseUrl, {
   // Connection pool settings optimized for Supabase
-  max: 5, // Maximum connections in pool
+  max: 3, // Reduced pool size for better stability
   idle_timeout: 0, // Disable idle timeout (Supabase handles this)
-  connect_timeout: 15, // Connection timeout in seconds
+  connect_timeout: 30, // Increased connection timeout
 
   // SSL configuration for Supabase
   ssl: {
     rejectUnauthorized: false,
-    ca: process.env.CA_CERT, // Supabase CA certificate if provided
+  },
+
+  // Force IPv4 connections
+  host: databaseUrl.match(/[@]([^:]+):/)?.[1], // Extract host from connection string
+  prefer_query_mode: "simple",
+  connection: {
+    options: `-c search_path=public -c statement_timeout=60000`,
   },
 
   // Retry configuration

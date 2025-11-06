@@ -89,11 +89,11 @@ const startServer = async () => {
     const isConnected = await testConnection();
 
     if (!isConnected) {
-      console.error("❌ Database connection failed");
-      process.exit(1);
+      console.error("⚠️ Database connection failed - starting server anyway");
+      // Don't exit, allow server to start for health checks
+    } else {
+      console.log("✅ Database connected successfully");
     }
-
-    console.log("✅ Database connected successfully");
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port: ${PORT}`);
@@ -104,7 +104,10 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error("❌ Unable to start server:", error);
-    process.exit(1);
+    // For serverless, don't exit - let the function handle errors
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 };
 
@@ -117,4 +120,10 @@ const gracefulShutdown = async (signal) => {
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 
-startServer();
+// Start server normally for local development or non-serverless environments
+if (process.env.VERCEL !== '1') {
+  startServer();
+}
+
+// Export for Vercel serverless
+export default app;
